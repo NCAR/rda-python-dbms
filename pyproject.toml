@@ -30,11 +30,14 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-"rda_python_dbms" = ["pgddl.usg"]
-"tables" = ["tables"]
+"rda_python_dbms" = ["pgddl.usg", "tables"]
 
 [project.urls]
 "Homepage" = "https://github.com/NCAR/rda-python-dbms"
 
 [project.scripts]
 pgddl = "rda_python_dbms.pgddl:main"
+pgseq = "rda_python_dbms.pgseq:main"
+pgbackup = "rda_python_dbms.pgbackup:main"
+pgchksum = "rda_python_dbms.pgchksum:main"
+pgcmptables = "rda_python_dbms.pgcmptables:main"
