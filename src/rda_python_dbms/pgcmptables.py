@@ -23,7 +23,7 @@ import datetime
 from datetime import timedelta as td
 from datetime import datetime as dt
 from rda_python_common import PgLOG
-from rda_python_common import MyDBI
+from rda_python_common import PgDBI
 from rda_python_common import PgUtil
 from . import MyDBI
 

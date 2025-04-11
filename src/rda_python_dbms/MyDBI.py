@@ -171,7 +171,6 @@ def view_dbinfo(dbname = None, lnname = None, pwname = None):
 #
 def set_dbname(dbname = None, lnname = None, pwname = None, dbhost = None, dbport = None, socket = None):
 
-   global mydb
    changed = 0
 
    if dbname and dbname != MYDBI['DBNAME']:
@@ -206,7 +205,6 @@ def set_dbname(dbname = None, lnname = None, pwname = None, dbhost = None, dbpor
 def starttran():
 
    global curtran
-   global mydb
 
    if curtran: endtran()   # try to end previous transaction
    if not (mydb and mydb.is_connected): myconnect(1)
@@ -219,7 +217,6 @@ def starttran():
 def endtran():
 
    global curtran
-   global mydb
    if curtran and mydb and mydb.is_connected(): mydb.commit()
    curtran = 0
 
@@ -229,7 +226,6 @@ def endtran():
 def aborttran():
 
    global curtran
-   global mydb
    if curtran and mydb and mydb.is_connected(): mydb.rollback()
    curtran = 0
 
@@ -441,7 +437,6 @@ def myconnect(reconnect = 0, mycnt = 0):
 #
 def mycursor():
 
-   global mydb
    mycur = None
 
    if not mydb:
@@ -929,7 +924,7 @@ def myhget(tablenames, fields, cndstr, cnddict, logact = 0):
             records = {}
             for i in range(ccnt):
                records[cols[i]] = list(values[i])
-            if tablenames in MYSTRS: decode_byte_record(MYSTRS[tablenames], record)
+            if tablenames in MYSTRS: decode_byte_record(MYSTRS[tablenames], records)
          else:
             records = None
          mycur.close()
@@ -1189,7 +1184,7 @@ def mycheck(tablename, logact = 0):
 def check_user_uid(userno, date = None):
 
    if not userno: return 0
-   if tyep(userno) is str: userno = int(userno)
+   if type(userno) is str: userno = int(userno)
       
    if date is None:
       datecond = "until_date IS NULL"
@@ -1211,7 +1206,7 @@ def check_user_uid(userno, date = None):
    myrec = ucar_user_info(userno)
    if not myrec: myrec = {'userno' : userno, 'stat_flag' : 'M'}
    uid = myadd("user", myrec, (MYDBI['LOGACT']|PgLOG.EXITLG|PgLOG.AUTOID))
-   if uid: PgLOG.pglog("{}: Scientist ID Added as user.uid = {}".format(useno, uid), PgLOG.LGWNEM)
+   if uid: PgLOG.pglog("{}: Scientist ID Added as user.uid = {}".format(userno, uid), PgLOG.LGWNEM)
 
    return uid
 
@@ -1263,7 +1258,7 @@ def ucar_user_info(userno, logname = None):
       'phone' : "phoneno"
    }
 
-   buf = pgsystem("pgperson " + ("-uid {}".format(userno) if userno else "-username {}".format(logname)), PgLOG.LOGWRN, 20)
+   buf = PgLOG.pgsystem("pgperson " + ("-uid {}".format(userno) if userno else "-username {}".format(logname)), PgLOG.LOGWRN, 20)
    if not buf: return None
 
    myrec = {}
@@ -1284,7 +1279,7 @@ def ucar_user_info(userno, logname = None):
    if myrec['upid']: myrec['upid'] = int(myrec['upid'])          
    if myrec['stat_flag']: myrec['stat_flag'] = 'A' if myrec['stat_flag'] == '1' else 'C'
    if myrec['email'] and re.search(r'\.ucar\.edu$', myrec['email']. re.I):
-      myrec[email] = myrec['ucaremail']
+      myrec['email'] = myrec['ucaremail']
    myrec['country'] = set_country_code(myrec['email'], myrec['country'])
    if myrec['division']:
       val = "NCAR"
@@ -1292,7 +1287,7 @@ def ucar_user_info(userno, logname = None):
       val = None
    myrec['org_type'] = get_org_type(val, myrec['email'])
 
-   buf = pgsystem("pgusername {}".format(myrec[logname]), PgLOG.LOGWRN, 20)
+   buf = PgLOG.pgsystem("pgusername {}".format(myrec[logname]), PgLOG.LOGWRN, 20)
    if not buf: return myrec
 
    for line in buf.split('\n'):
@@ -1300,16 +1295,16 @@ def ucar_user_info(userno, logname = None):
       if ms:
          (key, val) = ms.groups()
          if key == 'startDate':
-            m = r.match(r'^(\d+-\d+-\d+)\s', val)
+            m = re.match(r'^(\d+-\d+-\d+)\s', val)
             if m:
-               myrec['start_date'] = group(1)
+               myrec['start_date'] = m.group(1)
             else:
                myrec['start_date'] = val
 
          if key == 'endDate':
-            m = r.match(r'^(\d+-\d+-\d+)\s', val)
+            m = re.match(r'^(\d+-\d+-\d+)\s', val)
             if m:
-               myrec['until_date'] = group(1)
+               myrec['until_date'] = m.group(1)
             else:
                myrec['until_date'] = val
 
@@ -1396,37 +1391,6 @@ def check_wuser_wuid(email, date = None):
       return wuid
 
    return 0
-
-# return wuser.wuid upon success, 0 otherwise
-def check_cdp_wuser(username):
-
-   myrec = myget("wuser", "wuid", "cdpname = '{}'".format(username), MYDBI['LOGACT']|PgLOG.EXITLG)
-   if myrec: return myrec['wuid']
-   
-   # missing wuser record add one in
-   myrec = get_cdp_user(None, None, username)
-   if not myrec:
-      if username not in LMISSES:
-         PgLOG.pglog("Missing CDP User '{}'".format(username), PgLOG.LGWNEM)
-         LMISSES['username'] = 1
-      return 0
-
-   idrec = myget("wuser", "wuid", "email = '{}'".format(myrec['email']), MYDBI['LOGACT']|PgLOG.EXITLG)
-   wuid = idrec['wuid'] if idrec else 0
-   if wuid > 0:
-      idrec = {}
-      idrec['cdpid'] = myrec['cdpid']
-      idrec['cdpname'] = myrec['cdpname']
-      myupdt("wuser", idrec, "wuid = {}".format(wuid) , MYDBI['LOGACT']|PgLOG.EXITLG)
-   else:
-      myrec['stat_flag'] = 'A'
-      myrec['org_type'] = get_org_type(myrec['org_type'], myrec['email'])
-      myrec['country'] = email_to_country(myrec['email'])
-      wuid = myadd("wuser", myrec, MYDBI['LOGACT']|PgLOG.EXITLG|PgLOG.AUTOID)
-      if wuid > 0:
-         PgLOG.pglog("CDP User {} added as wuid = {} in RDADB".format(username, wuid), PgLOG.LGWNEM)
-
-   return wuid
 
 #
 # for given email to get long country name
