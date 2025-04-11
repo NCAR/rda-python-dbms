@@ -1,1 +1,1 @@
-RDA python code template to create new and modify existing RDA python packages.
+RDA python Package to manage RDA PostgreSQL databases.

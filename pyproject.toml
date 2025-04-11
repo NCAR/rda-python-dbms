@@ -5,12 +5,12 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "rda_python_template"
-version = "1.0.0"
+name = "rda_python_dbms"
+version = "1.0.1"
 authors = [
   { name="Zaihua Ji", email="zji@ucar.edu" },
 ]
-description = "RDA Python code template to create new and modify existing other RDA python packages"
+description = "RDA Python Package to manage PostreSQL databases"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
@@ -30,10 +30,14 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-"rda_python_tmplate" = ["hello_world.usg"]
+"rda_python_dbms" = ["pgddl.usg", "tables"]
 
 [project.urls]
-"Homepage" = "https://github.com/NCAR/rda-python-template"
+"Homepage" = "https://github.com/NCAR/rda-python-dbms"
 
 [project.scripts]
-hello_world = "rda_python_template.hello_world:main"
+pgddl = "rda_python_dbms.pgddl:main"
+pgseq = "rda_python_dbms.pgseq:main"
+pgbackup = "rda_python_dbms.pgbackup:main"
+pgchksum = "rda_python_dbms.pgchksum:main"
+pgcmptables = "rda_python_dbms.pgcmptables:main"
