@@ -22,7 +22,6 @@ from rda_python_common import PgDBI
 from rda_python_common import PgUtil 
 from rda_python_common import PgFile
 from rda_python_common import PgCMD
-from rda_python_common import PgDBI
 from rda_python_common import PgSplit
 
 PGSUM = {
@@ -189,7 +188,7 @@ def send_check_email(pgcmd, cnt, fcnt):
    PgLOG.set_email(buf, PgLOG.EMLTOP)
 
    if PgLOG.PGLOG['DSCHECK']:
-      PgDBI.build_customized_email("dscheck", "einfo", "cindex = {}".format(PgLOG.PGLOG['DSCHECK'][cindex]),
+      PgDBI.build_customized_email("dscheck", "einfo", "cindex = {}".format(PgLOG.PGLOG['DSCHECK']['cindex']),
                                    subject, PgLOG.LOGWRN)
    else:
       PgLOG.pglog(subject, PgLOG.LOGWRN|PgLOG.SNDEML)

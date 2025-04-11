@@ -94,7 +94,7 @@ def main():
          actopt = False
          if option in 'abefm':
             if option == "b":
-               PGLOG['BCKGRND'] = 1
+               PgLOG.PGLOG['BCKGRND'] = 1
             elif option == "a":
                getall= True
             elif option == "e":

@@ -34,7 +34,7 @@ DBINFO = {
 
 TABLES = {}
 PGDDL = {
-   'TBPATH' : PgLOG.join_paths(op.dirname(op.abspath(__FILE__)), "tables"),
+   'TBPATH' : PgLOG.join_paths(op.dirname(op.abspath(__file__)), "tables"),
    'suffix' : [],
    'prefix' : [],
    'override' : False,
@@ -386,7 +386,7 @@ def pg_table_comment(cmd, tablename):
 
    buf = PgLOG.pgsystem("{} '\dt+ {}'".format(cmd, tablename), PgLOG.LOGWRN, 21)
    lines = buf.split('\n')
-   if len(lines) < 4: PgLOG.pglog("{}: Fail \dt+".format(tabletname), PgLOG.LGEREX)
+   if len(lines) < 4: PgLOG.pglog("{}: Fail \dt+".format(tablename), PgLOG.LGEREX)
    line = lines.pop()
    cols = re.split(r'\s*\|\s*', line)
    clen = len(cols)
@@ -1078,7 +1078,7 @@ def get_root_table_def(tbname, tbpath, scname, ext):
          PgLOG.pglog("{}: Use table info in {}".format(table['name'], tbfile), PgLOG.LOGWRN)
          return table
 
-   ms = re.match(r'^([^_]+)_(.+)$', tablename)
+   ms = re.match(r'^([^_]+)_(.+)$', tbname)
    if not ms: return None
    tname = ms.group(2)
    pre = ms.group(1) if ext == 'json' else None

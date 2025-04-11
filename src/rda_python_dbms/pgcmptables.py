@@ -25,6 +25,7 @@ from datetime import datetime as dt
 from rda_python_common import PgLOG
 from rda_python_common import MyDBI
 from rda_python_common import PgUtil
+from . import MyDBI
 
 PVALS = {
    'db' : None,
