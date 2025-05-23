@@ -24,6 +24,11 @@
       "comment": "user country name"
     },
     {
+      "name": "region",
+      "type": "varchar(80)",
+      "comment": "region name, state or province"
+    },
+    {
       "name": "dsid",
       "type": "varchar(9)",
       "comment": "reference to dataset.dsid"

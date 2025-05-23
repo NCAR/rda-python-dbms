@@ -22,6 +22,7 @@ from rda_python_common import PgUtil
 SINFO = {
    'ht' : 'rda-pgdb-02.ucar.edu',
    'db' : 'rdadb',
+   'pt' : 5432,
    'us' : '',
    'pw' : '',
 }
@@ -40,7 +41,7 @@ def main():
    for arg in argv:
       if arg == "-b":
          PgLOG.MYLOG['BCKGRND'] = 1
-      elif re.match(r'^-([dhpstu])$', arg):
+      elif re.match(r'^-([cdhptuw])$', arg):
          option = arg[1]
       elif re.match(r'^-', arg):
          PgLOG.pglog(arg + ": Invalid Option", PgLOG.LGWNEX)
@@ -50,10 +51,12 @@ def main():
          elif option == 'h':
             SINFO['ht'] = arg
          elif option == 'p':
+            SINFO['pt'] = int(arg)
+         elif option == 'w':
             SINFO['pw'] = arg
          elif option == 'u':
             SINFO['us'] = arg
-         elif option == 's':
+         elif option == 'c':
             scnames.append(arg)
          elif option == 't':
             tbnames.append(arg)
@@ -61,14 +64,15 @@ def main():
          PgLOG.pglog(arg + ": Passed in without leading Option", PgLOG.LGWNEX)
 
    if not scnames:
-      print("Usage: pgseq [-h HostName] [-d DatabaseName] -s SchemaNames  \\")
+      print("Usage: pgseq [-h HostName] [-d DatabaseName] -c SchemaNames  \\")
       print("             [-t TableNames] [-u UserName] [-p Password]")
       print("   -h: PostgreSQL Database server hostname, default to " + SINFO['ht'])
+      print("   -p: PostgreSQL Database server port number, default to " + str(SINFO['pt']))
       print("   -d: PostgreSQL Database name, default to " + SINFO['db'])
-      print("   -s: Reset sequences for the provided Schemas, at least provide one")
+      print("   -c: Reset sequences for the provided Schemas, at least provide one")
       print("   -t: Table names to reset sequences, default to all tables in the schema")
       print("   -u: Provide database login username if other than the schema name")
-      print("   -p: Optional database login password")
+      print("   -w: database login password")
       sys.exit(0)
 
    PgLOG.cmdlog("pgseq {}".format(' '.join(argv)))
@@ -81,7 +85,7 @@ def reset_table_sequence(scname, tbnames):
 
    us = SINFO['us'] if SINFO['us'] else scname
    pw = SINFO['pw'] if SINFO['pw'] else us
-   PgDBI.default_scinfo(SINFO['db'], scname, SINFO['ht'], us, pw)
+   PgDBI.default_scinfo(SINFO['db'], scname, SINFO['ht'], us, pw, SINFO['pt'])
    scnd = "table_catalog = '{}' AND table_schema = '{}' AND table_type = 'BASE TABLE'".format(SINFO['db'], scname)
    if tbnames:
       cnd = " AND table_name "

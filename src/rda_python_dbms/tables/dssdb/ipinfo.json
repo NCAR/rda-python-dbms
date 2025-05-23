@@ -19,7 +19,7 @@
     {
       "name": "ip",
       "type": "varchar(32)",
-      "comment": "ip aaddress"
+      "comment": "ip address"
     },
     {
       "name": "hostname",
@@ -58,6 +58,11 @@
       "comment": "user country name"
     },
     {
+      "name": "region",
+      "type": "varchar(80)",
+      "comment": "region name for the ip, state or province"
+    },
+    {
       "name": "city",
       "type": "varchar(80)",
       "comment": "city name for the ip"
@@ -91,6 +96,10 @@
     {
       "name": "ipinfo_idx_3",
       "column": "stat_flag"
+    },
+    {
+      "name": "ipinfo_idx_4",
+      "column": "hostname"
     }
   ],
   "comment": "IP ADDRESS INFORMATION"
