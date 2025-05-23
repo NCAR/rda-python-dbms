@@ -47,6 +47,11 @@
       "comment": "organization type like DSS, UCAR or UNIV"
     },
     {
+      "name": "region",
+      "type": "varchar(80)",
+      "comment": "region name, state or province"
+    },
+    {
       "name": "country",
       "type": "varchar(30)",
       "comment": "user country name"

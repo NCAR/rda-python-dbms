@@ -693,15 +693,32 @@ def change_column_action(ptname, poname, pcname):
 #
 # action string to modify a column
 #
-def modify_column_action(ptname, pcname, column):
+def modify_column_action(ptname, pcname, column, tbname):
 
-   sqlstr = "ALTER TABLE {}".format(ptname)
-   sqlstr += "\n  ALTER COLUMN {} TYPE {}".format(pcname, column['type'])
-   if 'notnull' in column: sqlstr += ",\n  ALTER COLUMN {} SET {}".format(pcname, column['notnull'])
-   if 'default' in column: sqlstr += ",\n  ALTER COLUMN {} SET DEFAULT {}".format(pcname, column['default'])
+   sqlstr = ''
+   dlt = None
+   type = column['type']
+   ms = re.match(r'^\s*(\w*)serial$', type)
+   if ms:
+      pint = ms.group(1)
+      if pint:
+         type = pint + 'int'
+      else:
+         type = 'integer'
+      sqname = f"{tbname}_{pcname}_seq"
+      sqlstr = f"CREATE SEQUENCE {sqname} OWNED BY {ptname}.{pcname};\n"
+      dft = f"nextval('{sqname}')"
+   elif 'default' in column:
+      dft = column['default']
+   sqlstr += f"ALTER TABLE {ptname}"
+   sqlstr += f"\n  ALTER COLUMN {pcname} TYPE {type}"
+   if 'notnull' in column:
+      sqlstr += f",\n  ALTER COLUMN {pcname} SET {column['notnull']}"
+   if dft: sqlstr += f",\n  ALTER COLUMN {pcname} SET DEFAULT {dft}"
    sqlstr += ";\n"
-   if 'comment' in column: sqlstr += "COMMENT ON COLUMN {}.{} IS '{}';\n".format(ptname, pcname, column['comment'])
-
+   if 'comment' in column:
+      sqlstr += f"COMMENT ON COLUMN {ptname}.{pcname} IS '{column['comment']}';\n"
+ 
    return sqlstr
 
 #
@@ -944,7 +961,7 @@ def process_tables(tablenames, act, opt, names = None):
             colname = column['name']
             pcname = PgDBI.pgname(colname)
             if names and colname not in names: continue
-            if column['type'].find('SERIAL') > -1:
+            if column['type'].find('serial') > -1:
                if names: PgLOG.pglog("{}: Cannt {} {} for SERIAL column {}".format(tbname, opt, act, colname), PgLOG.LOGWRN)
                continue
             if act == 'ADD':    # add column default
@@ -988,7 +1005,7 @@ def process_tables(tablenames, act, opt, names = None):
          if 'pkey' not in table:
             PgLOG.pglog(tbname + ": No primary key defined", PgLOG.LGEREX)
          if act == 'ADD':     # add primary key
-            sqlstr = add_pkey_action(ptname, table)
+            sqlstr = add_pkey_action(ptname, table['pkey'])
          elif act == 'DEL':   # drop primary key
             sqlstr = drop_pkey_action(ptname)
          PgDBI.pgexec(sqlstr, PgLOG.LGEREX)
@@ -1050,7 +1067,7 @@ def process_tables(tablenames, act, opt, names = None):
             elif act == 'CHG':
                sqlstr = change_column_action(ptname, poname, pcname)
             elif act == 'MOD':
-               sqlstr = modify_column_action(ptname, pcname, column)
+               sqlstr = modify_column_action(ptname, pcname, column, table['name'])
             PgDBI.pgexec(sqlstr, PgLOG.LGEREX)
             PgLOG.pglog("{}: {} {} {}".format(tbname, act, opt, colname), PgLOG.LOGWRN)
       elif opt == 'JSN':      # dump table to json

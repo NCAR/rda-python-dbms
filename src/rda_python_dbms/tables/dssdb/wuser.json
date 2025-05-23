@@ -79,6 +79,11 @@
       "comment": "name of the organization"
     },
     {
+      "name": "region",
+      "type": "varchar(80)",
+      "comment": "region name, state or province"
+    },
+    {
       "name": "country",
       "type": "varchar(30)",
       "comment": "user country name"
