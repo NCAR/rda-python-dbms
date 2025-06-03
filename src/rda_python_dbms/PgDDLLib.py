@@ -696,7 +696,7 @@ def change_column_action(ptname, poname, pcname):
 def modify_column_action(ptname, pcname, column, tbname):
 
    sqlstr = ''
-   dlt = None
+   dft = None
    type = column['type']
    ms = re.match(r'^\s*(\w*)serial$', type)
    if ms:
