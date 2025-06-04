@@ -81,6 +81,11 @@
       "name": "adddate",
       "type": "date",
       "comment": "date ip address added"
+    },
+    {
+      "name": "ipinfo",
+      "type": "json",
+      "comment": "original full ipinfo json data"
     }
   ],
   "index": [
