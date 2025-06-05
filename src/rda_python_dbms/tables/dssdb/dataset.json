@@ -136,6 +136,12 @@
       "comment": "automtic backup flag: B-Backup or D-Backup&Drdata"
     },
     {
+      "name": "accessflag",
+      "type": "char(1)",
+      "default": "'B'",
+      "comment": "Dataset Web file accessing flag: B-Both, C-Complete File List, or F-Faceted Browse"
+    },
+    {
       "name": "access_type",
       "type": "varchar(10)",
       "comment": "e-ERA40, I-DSS Internal, jra25-JRA-25, etc"
