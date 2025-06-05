@@ -69,6 +69,12 @@
       "default": "'P'",
       "comment": "automtic backup flag: P-Same As Parent, N-No Backup, B-Backup Only or D-Backup&Drdata"
     },
+     {
+      "name": "accessflag",
+      "type": "char(1)",
+      "default": "'B'",
+      "comment": "Top group Web file accessing flag: B-Both, C-Complete File List, or F-Faceted Browse"
+    },
     {
       "name": "level",
       "type": "smallint",
