@@ -99,12 +99,12 @@ spec:
       # IPv6 local connections with md5  
       - host all all ::1/128 md5
       
-      # IPv4 remote connections for your network (adjust CIDR as needed)
+      # IPv4 remote connections for UCAR network
       - host all all 128.117.0.0/16 md5
       
       # Replication connections
       - local replication all md5
       - host replication all 127.0.0.1/32 md5
       
-      # Remote replication (using trust - consider changing to md5 for security)
+      # Remote replication
       - host replication all 128.117.0.0/16 trust
