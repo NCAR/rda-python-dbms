@@ -2,13 +2,7 @@ db:
   name: pgdb02
   group: pgdb02
   instances: 1
-  size: 50Gi
+  size: 5000Gi
   superUser:
     passwordKey: supass
     secretPath: GDEX/pgdb02
-  app:
-    name: #APP_DB_NAME
-    owner: #APP_OWNER_USERNAME
-    usernameKey: #APP_USERNAME_SECRET_KEY
-    passwordKey: #APP_PASSWORD_SECRET_KEY
-    secretPath: #APP_USER_SECRET_PATH

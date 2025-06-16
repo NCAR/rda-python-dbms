@@ -27,11 +27,3 @@ spec:
   # Configure postgres superuser from su_external_secret
   superuserSecret:
     name: "{{ .Values.db.name }}-superuser"
-
-  # Create a standard user from user_external_secret
-  bootstrap:
-    initdb:
-      database: {{ .Values.db.app.name }}
-      owner: {{ .Values.db.app.owner }}
-      secret:
-        name: "{{ .Values.db.name }}-app-user"
