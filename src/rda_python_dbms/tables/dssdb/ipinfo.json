@@ -49,7 +49,7 @@
     },
     {
       "name": "org_name",
-      "type": "varchar(128)",
+      "type": "varchar(256)",
       "comment": "name of the organization"
     },
     {
