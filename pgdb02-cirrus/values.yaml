@@ -1,0 +1,9 @@
+db:
+  name: pgdb02
+  group: pgdb02
+  instances: 3
+  size: 5000Gi
+  superUser:
+    usernameKey: username
+    passwordKey: password
+    secretPath: gdex/pgdb02

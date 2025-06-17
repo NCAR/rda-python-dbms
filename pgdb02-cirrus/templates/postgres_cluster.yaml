@@ -1,0 +1,115 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.db.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.db.name }}
+    group: {{ .Values.db.group }}
+spec:
+  instances: {{ .Values.db.instances }}
+  storage:
+    size: {{ .Values.db.size }}
+
+  # Add TLS certificates for encrypted communication
+  certificates:
+    serverTLSSecret: {{ .Values.db.name }}-server-cert
+    serverCASecret: {{ .Values.db.name }}-server-cert
+
+  # Allow outside hosts to connect to the database
+  postgresql:
+    pg_hba:
+      - "host all all 0.0.0.0/0 md5"
+
+  # Enable superuser access
+  enableSuperuserAccess: true
+  
+  # Configure postgres superuser from su_external_secret
+  superuserSecret:
+    name: "{{ .Values.db.name }}-superuser"
+    
+  # Allow outside hosts to connect to the database
+  postgresql:
+    parameters:
+      # Connection settings
+      listen_addresses: "*"
+      port: "5432"
+      max_connections: "500"
+      
+      # SSL Configuration
+      ssl: "on"
+      ssl_ciphers: "HIGH:!aNULL"
+      ssl_prefer_server_ciphers: "on"
+      ssl_min_protocol_version: "TLSv1.3"
+      
+      # Memory settings
+      shared_buffers: "32GB"
+      temp_buffers: "64MB"
+      work_mem: "32MB"
+      maintenance_work_mem: "128MB"
+      dynamic_shared_memory_type: "posix"
+      
+      # Resource limits
+      max_files_per_process: "2000"
+      
+      # WAL settings
+      wal_level: "replica"
+      checkpoint_timeout: "15min"
+      checkpoint_completion_target: "0.9"
+      max_wal_size: "20GB"
+      min_wal_size: "1GB"
+      
+      # Replication settings
+      max_wal_senders: "3"
+      max_replication_slots: "3"
+      wal_keep_size: "256"
+      max_slot_wal_keep_size: "-1"
+      hot_standby: "on"
+      max_standby_archive_delay: "-1"
+      max_standby_streaming_delay: "-1"
+      
+      # Logging settings
+      log_destination: "stderr"
+      logging_collector: "on"
+      log_directory: "log"
+      log_filename: "postgresql-%Y-%m-%d_%H%M%S.log"
+      log_file_mode: "0644"
+      log_rotation_age: "0"
+      log_rotation_size: "1GB"
+      log_truncate_on_rotation: "off"
+      log_min_duration_statement: "120000"
+      log_line_prefix: "%t %a [%p] "
+      log_timezone: "America/Denver"
+      
+      # Locale and timezone settings
+      datestyle: "iso, mdy"
+      timezone: "America/Denver"
+      lc_messages: "en_US.UTF-8"
+      lc_monetary: "en_US.UTF-8"
+      lc_numeric: "en_US.UTF-8"
+      lc_time: "en_US.UTF-8"
+      default_text_search_config: "pg_catalog.english"
+      
+      # Lock management
+      max_locks_per_transaction: "1024"
+    
+    pg_hba:
+      # Local connections with md5 authentication
+      - local all root md5
+      - local all all md5
+      
+      # IPv4 local connections with md5
+      - host all all 127.0.0.1/32 md5
+      
+      # IPv6 local connections with md5  
+      - host all all ::1/128 md5
+      
+      # IPv4 remote connections for UCAR network
+      - host all all 128.117.0.0/16 md5
+      
+      # Replication connections
+      - local replication all md5
+      - host replication all 127.0.0.1/32 md5
+      
+      # Remote replication
+      - host replication all 128.117.0.0/16 trust
