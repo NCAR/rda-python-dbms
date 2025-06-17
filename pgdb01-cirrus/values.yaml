@@ -1,8 +1,9 @@
 db:
   name: pgdb01
   group: pgdb01
-  instances: 1
+  instances: 3
   size: 5000Gi
   superUser:
-    passwordKey: supass
-    secretPath: GDEX/pgdb01
+    usernameKey: username
+    passwordKey: password
+    secretPath: gdex/pgdb01
