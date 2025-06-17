@@ -69,7 +69,7 @@
     },
     {
       "name": "postal",
-      "type": "varchar(10)",
+      "type": "varchar(20)",
       "comment": "ip location postal code"
     },
     {
