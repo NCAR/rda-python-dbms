@@ -138,7 +138,7 @@
     {
       "name": "accessflag",
       "type": "char(1)",
-      "default": "'B'",
+      "default": "'C'",
       "comment": "Dataset Web file accessing flag: B-Both, C-Complete File List, or F-Faceted Browse"
     },
     {
