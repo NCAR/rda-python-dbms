@@ -30,16 +30,13 @@ spec:
     
   # Allow outside hosts to connect to the database
   postgresql:
+  postgresql:
     parameters:
       # Connection settings
-      listen_addresses: "*"
-      port: "5432"
       max_connections: "500"
       
       # SSL Configuration
-      ssl: "on"
       ssl_ciphers: "HIGH:!aNULL"
-      ssl_prefer_server_ciphers: "on"
       ssl_min_protocol_version: "TLSv1.3"
       
       # Memory settings
@@ -64,19 +61,12 @@ spec:
       max_replication_slots: "3"
       wal_keep_size: "256"
       max_slot_wal_keep_size: "-1"
-      hot_standby: "on"
       max_standby_archive_delay: "-1"
       max_standby_streaming_delay: "-1"
       
       # Logging settings
-      log_destination: "stderr"
       logging_collector: "on"
-      log_directory: "log"
-      log_filename: "postgresql-%Y-%m-%d_%H%M%S.log"
-      log_file_mode: "0644"
       log_rotation_age: "0"
-      log_rotation_size: "1GB"
-      log_truncate_on_rotation: "off"
       log_min_duration_statement: "120000"
       log_line_prefix: "%t %a [%p] "
       log_timezone: "America/Denver"
