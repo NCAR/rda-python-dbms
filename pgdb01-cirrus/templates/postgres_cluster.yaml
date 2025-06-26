@@ -44,7 +44,7 @@ spec:
       max_files_per_process: "2000"
       
       # WAL settings
-      wal_level: "replica"
+      wal_level: "logical"
       checkpoint_timeout: "15min"
       checkpoint_completion_target: "0.9"
       max_wal_size: "20GB"
