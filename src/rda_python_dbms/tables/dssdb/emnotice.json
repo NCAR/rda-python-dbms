@@ -23,7 +23,7 @@
     },
     {
       "name": "specialist",
-      "type": "varchar(8)",
+      "type": "varchar(20)",
       "comment": "login names of specialists who handles datasets"
     },
     {

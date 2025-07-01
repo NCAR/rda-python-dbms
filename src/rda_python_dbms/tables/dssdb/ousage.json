@@ -23,7 +23,7 @@
     },
     {
       "name": "dss_uname",
-      "type": "varchar(8)",
+      "type": "varchar(20)",
       "comment": "DSS staff user login name"
     },
     {

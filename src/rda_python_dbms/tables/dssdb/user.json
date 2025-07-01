@@ -34,7 +34,7 @@
     },
     {
       "name": "logname",
-      "type": "varchar(8)",
+      "type": "varchar(20)",
       "comment": "login name, null/empty if no NCAR account"
     },
     {

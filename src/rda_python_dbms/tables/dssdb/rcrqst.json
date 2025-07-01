@@ -78,7 +78,7 @@
     },
     {
       "name": "specialist",
-      "type": "varchar(8)",
+      "type": "varchar(20)",
       "notnull": "NOT NULL",
       "comment": "login name of specialist doing request, default to dsowner"
     },
