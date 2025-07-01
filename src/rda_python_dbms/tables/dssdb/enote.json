@@ -11,7 +11,7 @@
   "column": [
     {
       "name": "logname",
-      "type": "varchar(8)",
+      "type": "varchar(20)",
       "pkey": "PRIMARY KEY",
       "notnull": "NOT NULL",
       "comment": "login name of ncar computer system"

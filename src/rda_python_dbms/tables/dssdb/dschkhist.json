@@ -33,7 +33,7 @@
     },
     {
       "name": "specialist",
-      "type": "varchar(8)",
+      "type": "varchar(20)",
       "comment": "login name of specialist"
     },
     {
