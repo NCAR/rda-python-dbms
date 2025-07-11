@@ -67,7 +67,7 @@
     },
     {
       "name": "ip",
-      "type": "varchar(15)",
+      "type": "varchar(39)",
       "comment": "IP address"
     },
     {
