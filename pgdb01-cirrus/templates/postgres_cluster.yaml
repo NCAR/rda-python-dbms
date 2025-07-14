@@ -16,14 +16,18 @@ spec:
     serverTLSSecret: {{ .Values.db.name }}-server-cert
     serverCASecret: {{ .Values.db.name }}-server-cert
 
+  # Allow outside hosts to connect to the database
+  postgresql:
+    pg_hba:
+      - "host all all 0.0.0.0/0 md5"
+
   # Enable superuser access
   enableSuperuserAccess: true
   
   # Configure postgres superuser from su_external_secret
   superuserSecret:
     name: "{{ .Values.db.name }}-superuser"
-
-  # Allow outside hosts to connect to the database
+    
   postgresql:
     parameters:
       # Connection settings
@@ -76,7 +80,7 @@ spec:
       
       # Lock management
       max_locks_per_transaction: "1024"
-    
+      
     pg_hba:
       # Local connections with md5 authentication
       - local all root md5
