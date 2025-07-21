@@ -6,4 +6,6 @@ db:
   superUser:
     usernameKey: username
     passwordKey: password
+    replicationUserKey: repuser
+    replicationPassKey: reppass
     secretPath: gdex/pgdb02
