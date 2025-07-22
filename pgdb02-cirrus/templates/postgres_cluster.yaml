@@ -20,10 +20,10 @@ spec:
     connectionParameters:
       host: pgdb01.k8s.ucar.edu
       user: "repl" 
-      password:
-        name: {{ .Values.db.name }}-superuser
-        key: replication-password
       sslmode: prefer
+    password:
+      name: {{ .Values.db.name }}-superuser
+      key: replication-password
 
   # Add TLS certificates for encrypted communication
   certificates:
