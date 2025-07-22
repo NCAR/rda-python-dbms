@@ -11,6 +11,22 @@ spec:
   storage:
     size: {{ .Values.db.size }}
 
+  replica:
+    enabled: true
+    source: pgdb01-external
+
+  externalClusters:
+  - name: pgdb01-external
+    connectionParameters:
+      host: pgdb01.k8s.ucar.edu
+      user:
+        name: {{ .Values.db.name }}-superuser
+        key: replication-username
+      password:
+        name: {{ .Values.db.name }}-superuser
+        key: replication-password
+      sslmode: prefer
+
   # Add TLS certificates for encrypted communication
   certificates:
     serverTLSSecret: {{ .Values.db.name }}-server-cert
