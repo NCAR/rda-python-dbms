@@ -19,7 +19,7 @@ spec:
   - name: pgdb01-external
     connectionParameters:
       host: pgdb01.k8s.ucar.edu
-      user: repl 
+      user: "repl" 
       password:
         name: {{ .Values.db.name }}-superuser
         key: replication-password
