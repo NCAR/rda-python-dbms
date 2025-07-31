@@ -16,11 +16,6 @@ spec:
     serverTLSSecret: {{ .Values.db.name }}-server-cert
     serverCASecret: {{ .Values.db.name }}-server-cert
 
-  # Allow outside hosts to connect to the database
-  postgresql:
-    pg_hba:
-      - "host all all 0.0.0.0/0 md5"
-
   # Enable superuser access
   enableSuperuserAccess: true
   
@@ -30,7 +25,8 @@ spec:
     
   # Allow outside hosts to connect to the database
   postgresql:
-  postgresql:
+    pg_hba:
+      - "host all all 0.0.0.0/0 md5"
     parameters:
       # Connection settings
       max_connections: "500"
@@ -53,8 +49,8 @@ spec:
       wal_level: "replica"
       checkpoint_timeout: "15min"
       checkpoint_completion_target: "0.9"
-      max_wal_size: "20GB"
-      min_wal_size: "1GB"
+      max_wal_size: "5GB"
+      min_wal_size: "512MB"
       
       # Replication settings
       max_wal_senders: "3"
