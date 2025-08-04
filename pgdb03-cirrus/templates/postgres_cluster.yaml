@@ -6,8 +6,6 @@ metadata:
   labels:
     app: {{ .Values.db.name }}
     group: {{ .Values.db.group }}
-  annotations:
-    cnpg.io/skipWalArchiveCheck: "true"
 spec:
   instances: {{ .Values.db.instances }}
   storage:
