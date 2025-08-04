@@ -12,7 +12,11 @@ metadata:
     volume.beta.kubernetes.io/storage-provisioner: rbd.csi.ceph.com
     volume.kubernetes.io/storage-provisioner: rbd.csi.ceph.com
     
+    argocd.argoproj.io/sync-options: Delete=false,Replace=true,Force=true
+    cluster.x-k8s.io/managed-by: manual-override
+    
   labels:
+    argocd.argoproj.io/instance: rda-pgdb03
     cnpg.io/cluster: pgdb03
     cnpg.io/instanceName: pgdb03-4
     cnpg.io/instanceRole: primary
@@ -21,7 +25,8 @@ metadata:
     
   finalizers:
     - kubernetes.io/pvc-protection
-
+    - custom.preserve/critical-data
+    
 spec:
   accessModes:
     - ReadWriteOnce
