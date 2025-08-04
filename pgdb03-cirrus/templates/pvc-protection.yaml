@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgdb03-4
+  namespace: rda
+  annotations:
+    cnpg.io/nodeSerial: '4'
+    cnpg.io/operatorVersion: 1.25.1
+    cnpg.io/pvcStatus: ready
+    pv.kubernetes.io/bind-completed: 'yes'
+    pv.kubernetes.io/bound-by-controller: 'yes'
+    volume.beta.kubernetes.io/storage-provisioner: rbd.csi.ceph.com
+    volume.kubernetes.io/storage-provisioner: rbd.csi.ceph.com
+    argocd.argoproj.io/sync-options: Delete=false
+    cluster.x-k8s.io/managed-by: manual-override
+    
+  labels:
+    cnpg.io/cluster: pgdb03
+    cnpg.io/instanceName: pgdb03-4
+    cnpg.io/instanceRole: primary
+    cnpg.io/pvcRole: PG_DATA
+    role: primary
+    
+  finalizers:
+    - kubernetes.io/pvc-protection
+    - custom.preserve/pgdb03-data
+  
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 9000Gi
+  storageClassName: ceph-kubepv
+  volumeMode: Filesystem
+  volumeName: pvc-03d9fa68-f05e-4bc0-815f-b9e0bce8fbd4
