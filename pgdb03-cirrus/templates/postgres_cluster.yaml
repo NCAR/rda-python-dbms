@@ -1,0 +1,47 @@
+# temporary-cluster.yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pgdb03
+  namespace: rda
+  labels:
+    app: pgdb03
+    argocd.argoproj.io/instance: rda-pgdb03
+    group: pgdb03
+spec:
+  instances: 1  # Start with just primary
+  
+  # Basic storage config
+  storage:
+    size: 9000Gi
+    storageClass: ceph-kubepv
+  
+  # Essential configs only
+  enableSuperuserAccess: true
+  
+  superuserSecret:
+    name: pgdb03-superuser
+    
+  certificates:
+    serverTLSSecret: pgdb03-server-cert
+    serverCASecret: pgdb03-server-cert
+  
+  # Minimal PostgreSQL config to get started
+  postgresql:
+    parameters:
+      max_connections: "500"
+      shared_buffers: "32GB"
+      max_wal_size: "10GB"
+      wal_keep_size: "2GB"
+      wal_level: "replica"
+      max_wal_senders: "3"
+      max_replication_slots: "3"
+      
+    pg_hba:
+      - local all all md5
+      - host all all 127.0.0.1/32 md5
+      - host all all ::1/128 md5
+      - host all all 128.117.0.0/16 md5
+      - local replication all md5
+      - host replication all 127.0.0.1/32 md5
+      - host replication all 128.117.0.0/16 trust
