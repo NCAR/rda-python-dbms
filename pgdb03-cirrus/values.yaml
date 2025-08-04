@@ -1,5 +1,5 @@
 db:
-  name: pgdb03-v2
+  name: pgdb03
   group: pgdb03
   instances: 2
   size: 9000Gi
