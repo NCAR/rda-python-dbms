@@ -11,8 +11,6 @@ metadata:
     pv.kubernetes.io/bound-by-controller: 'yes'
     volume.beta.kubernetes.io/storage-provisioner: rbd.csi.ceph.com
     volume.kubernetes.io/storage-provisioner: rbd.csi.ceph.com
-    argocd.argoproj.io/sync-options: Delete=false
-    cluster.x-k8s.io/managed-by: manual-override
     
   labels:
     cnpg.io/cluster: pgdb03
@@ -23,9 +21,6 @@ metadata:
     
   finalizers:
     - kubernetes.io/pvc-protection
-    - custom.preserve/pgdb03-data
-  
-  ownerReferences: []
 
 spec:
   accessModes:
