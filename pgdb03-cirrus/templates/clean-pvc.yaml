@@ -1,22 +1,21 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: pgdb03-4
+  name: pgdb03-1
   namespace: rda
   annotations:
-    cnpg.io/nodeSerial: '4'
+    cnpg.io/nodeSerial: '1'
     cnpg.io/operatorVersion: 1.25.1
     cnpg.io/pvcStatus: ready
     pv.kubernetes.io/bind-completed: 'yes'
     pv.kubernetes.io/bound-by-controller: 'yes'
     volume.beta.kubernetes.io/storage-provisioner: rbd.csi.ceph.com
     volume.kubernetes.io/storage-provisioner: rbd.csi.ceph.com
-    argocd.argoproj.io/sync-options: Replace=true,Force=true
     
   labels:
     argocd.argoproj.io/instance: rda-pgdb03
     cnpg.io/cluster: pgdb03
-    cnpg.io/instanceName: pgdb03-4
+    cnpg.io/instanceName: pgdb03-1
     cnpg.io/instanceRole: primary
     cnpg.io/pvcRole: PG_DATA
     role: primary
@@ -24,13 +23,6 @@ metadata:
   finalizers:
     - kubernetes.io/pvc-protection
     
-  ownerReferences:
-    - apiVersion: postgresql.cnpg.io/v1
-      controller: true
-      kind: Cluster
-      name: pgdb03
-      uid: f50f620b-6959-4529-8234-c604f241a820
-      
 spec:
   accessModes:
     - ReadWriteOnce
