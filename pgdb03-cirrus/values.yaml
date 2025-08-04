@@ -2,7 +2,7 @@ db:
   name: pgdb03
   group: pgdb03
   instances: 2
-  size: 8000Gi
+  size: 9000Gi
   superUser:
     usernameKey: username
     passwordKey: password
