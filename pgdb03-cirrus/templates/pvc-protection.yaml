@@ -25,6 +25,8 @@ metadata:
     - kubernetes.io/pvc-protection
     - custom.preserve/pgdb03-data
   
+  ownerReferences: []
+
 spec:
   accessModes:
     - ReadWriteOnce
