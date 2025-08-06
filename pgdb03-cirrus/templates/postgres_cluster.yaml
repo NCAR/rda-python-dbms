@@ -10,6 +10,10 @@ spec:
   instances: {{ .Values.db.instances }}
   storage:
     size: {{ .Values.db.size }}
+  resources:
+    limits:
+      cpu: {{ .Values.db.resource.limits.cpu }}
+      memory: {{ .Values.db.resource.limits.memory }}
 
   # Add TLS certificates for encrypted communication
   certificates:
@@ -25,8 +29,6 @@ spec:
     
   # Allow outside hosts to connect to the database
   postgresql:
-    pg_hba:
-      - "host all all 0.0.0.0/0 md5"
     parameters:
       # Connection settings
       max_connections: "500"
@@ -38,8 +40,8 @@ spec:
       # Memory settings
       shared_buffers: "32GB"
       temp_buffers: "64MB"
-      work_mem: "32MB"
-      maintenance_work_mem: "128MB"
+      work_mem: "64MB"
+      maintenance_work_mem: "512MB"
       dynamic_shared_memory_type: "posix"
       
       # Resource limits
@@ -49,13 +51,13 @@ spec:
       wal_level: "replica"
       checkpoint_timeout: "15min"
       checkpoint_completion_target: "0.9"
-      max_wal_size: "10GB"
+      max_wal_size: "16GB"
       min_wal_size: "512MB"
       
       # Replication settings
       max_wal_senders: "3"
       max_replication_slots: "3"
-      wal_keep_size: "2GB"
+      wal_keep_size: "4GB"
       max_slot_wal_keep_size: "-1"
       max_standby_archive_delay: "-1"
       max_standby_streaming_delay: "-1"
