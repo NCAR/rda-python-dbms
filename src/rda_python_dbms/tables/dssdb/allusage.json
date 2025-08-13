@@ -59,7 +59,7 @@
     },
     {
       "name": "method",
-      "type": "varchar(5)",
+      "type": "varchar(20)",
       "comment": "delv. methods: MSS,Web,Ftp,Tape,Cd,Disk,Paper,cArt,Micro"
     },
     {

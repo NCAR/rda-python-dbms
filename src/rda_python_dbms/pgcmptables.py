@@ -43,7 +43,7 @@ PVALS = {
    'cn' : 0,
    'ck' : None,
    'if' : None,    # input file holds table list of given schema to compare
-   'ct' : 'my',    # db server type, default to MySQL , optional to PostgreSQL
+   'ct' : 'pg',    # db server type, default to MySQL , optional to PostgreSQL
    'a'  : False,   # True for all tables in schema specified
    'f'  : False,   # True to fix table structure and/or data content
    's'  : False,   # True to display mismatching table structure and/or data content detail
@@ -63,7 +63,7 @@ TSCHEMA = CSCHEMA = None
 def main():
 
    argv = sys.argv[1:]
-   
+
    for arg in argv:
       if arg == "-b":
          PgLOG.PGLOG['BCKGRND'] = 1
@@ -109,7 +109,7 @@ def main():
       print("  Option -sk - the socket to connect to local database")
       print("  Option -ch - host name of the compared database server")
       print("  Option -cs - the schema name is compared, default to -sc")
-      print("  Option -ct - the compared database type, my - MySQL, pg - PostgreSQL, default to my")
+      print("  Option -ct - the compared database type, my - MySQL, pg - PostgreSQL, default to pg")
       print("  Option -cd - the compared database name, default to -db")
       print("  Option -cu - the compared user name, default to -us")
       print("  Option -cp - the compared password, default to -cu")

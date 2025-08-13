@@ -53,7 +53,7 @@
     },
     {
       "name": "method",
-      "type": "varchar(5)",
+      "type": "varchar(20)",
       "comment": "download methods: WEB, CURL, MGET, FTP and MGET"
     },
     {
