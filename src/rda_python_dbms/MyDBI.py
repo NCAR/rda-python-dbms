@@ -72,7 +72,7 @@ def SETMYDBI(name, value):
 
 SETMYDBI('CDHOST', 'rda-db.ucar.edu')  # common domain for db host for master server
 SETMYDBI('DEFNAME', 'dssdb')
-SETMYDBI('DEFHOST', PgLOG.PGLOG['SQLHOST'])
+SETMYDBI('DEFHOST', PgLOG.PGLOG['PSQLHOST'])
 SETMYDBI("DEFPORT", 0)
 SETMYDBI("DEFSOCK", '')
 SETMYDBI("DBNAME", MYDBI['DEFNAME'])
@@ -91,7 +91,7 @@ SETMYDBI("VWSOCK", '')
 
 MYDBI['DBSHOST'] = PgLOG.get_short_host(MYDBI['DBHOST'])
 MYDBI['DEFSHOST'] = PgLOG.get_short_host(MYDBI['DEFHOST'])
-MYDBI['VWHOST'] = PgLOG.PGLOG['VIEWHOST']
+MYDBI['VWHOST'] = PgLOG.PGLOG['PVIEWHOST']
 MYDBI['VWSHOST'] = PgLOG.get_short_host(MYDBI['VWHOST'])
 MYDBI['VWHOME'] =  (VIEWHOMES[PgLOG.PGLOG['HOSTNAME']] if PgLOG.PGLOG['HOSTNAME'] in VIEWHOMES else VIEWHOMES['default'])
 MYDBI['VHSET'] = 0
@@ -116,7 +116,7 @@ def get_myddl_command(tname):
 # set default connection for dssdb MySQL Server
 #
 def dssdb_dbname():
-   default_dbinfo(MYDBI['DEFNAME'], PgLOG.PGLOG['SQLHOST'])
+   default_dbinfo(MYDBI['DEFNAME'], PgLOG.PGLOG['PSQLHOST'])
 
 #
 # set default connection for obsua MySQL Server
@@ -163,7 +163,7 @@ def view_dbinfo(dbname = None, lnname = None, pwname = None):
 
    if not dbname: dbname = MYDBI['DEFNAME']
 
-   set_dbname(dbname, lnname, pwname, PgLOG.PGLOG['VIEWHOST'], MYDBI['VWPORT'])
+   set_dbname(dbname, lnname, pwname, PgLOG.PGLOG['PVIEWHOST'], MYDBI['VWPORT'])
    if dbname and dbname != MYDBI['VWNAME']: MYDBI['VWNAME'] = dbname
 
 #
