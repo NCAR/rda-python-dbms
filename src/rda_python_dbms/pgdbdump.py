@@ -19,6 +19,7 @@ from os import path as op
 from rda_python_common import PgLOG
 from rda_python_common import PgFile
 from rda_python_common import PgDBI
+from rda_python_common import PgUtil
 
 USNAME = 'postgres'
 LOGACT = PgLOG.LGWNEM
@@ -59,7 +60,7 @@ def main():
    PgLOG.cmdlog("pgdbdump {}".format(' '.join(argv)))
    pg_database_dbdump(dname, hname)
 
-   if not pname: pname = "{}_backup_{}".format(dbname, PgUtil.curdate())
+   if not pname: pname = "{}_backup_{}".format(dname, PgUtil.curdate())
    title = "pgdbdump: {}:{}".format(hname, dname, pname)
    tmsg = "{} to {} under {}!".format(title, pname, os.getcwd())
    PgLOG.set_email(tmsg, PgLOG.EMLTOP)
