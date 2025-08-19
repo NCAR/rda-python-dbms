@@ -59,7 +59,8 @@ def main():
    PgLOG.cmdlog("pgdbrestore {}".format(' '.join(argv)))
    pg_database_dbrestore(dname, hname, pname)
 
-   title = "pgdbrestore: {}:{} from {}!".format(hname, dname, pname)
+   title = "pgdbrestore: {}:{}".format(hname, dname)
+   tmsg = "{} from {} under {}!".format(title, pname, os.getcwd())
    PgLOG.set_email(tmsg, PgLOG.EMLTOP)
    PgLOG.pglog(title, SNDACT)
    PgLOG.cmdlog()   
@@ -72,7 +73,7 @@ def pg_database_dbrestore(dname, hname, pname):
 
    cmd = "pg_restore -d {} -h {} -U {} -w -j 12 -Fd {}".format(dname, hname, USNAME, pname)
    if not op.exists(pname):
-      PgLOG.pglog(backdir + ": Restoring local path not exists", ERRACT)
+      PgLOG.pglog(pname + ": Restoring local path not exists", ERRACT)
    elif not PgLOG.pgsystem(cmd, LOGACT, 257):
       PgLOG.pglog("{}: Error restoring database\n{}".format(dname, PgLOG.PGLOG['SYSERR']), ERRACT)
 
