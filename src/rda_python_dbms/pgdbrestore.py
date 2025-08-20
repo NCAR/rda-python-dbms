@@ -55,7 +55,8 @@ def main():
       print("  -d - PostgreSQL database name to restore from the local path")
       print("  -h - Hostname the PostgreSQL server is running on")
       print("  -p - Local relative path the dumped database stored")
-         
+      sys.exit(0)
+  
    PgLOG.cmdlog("pgdbrestore {}".format(' '.join(argv)))
    pg_database_dbrestore(dname, hname, pname)
 
@@ -71,7 +72,7 @@ def main():
 #
 def pg_database_dbrestore(dname, hname, pname):
 
-   cmd = "pg_restore -d {} -h {} -U {} -w -j 12 -Fd {}".format(dname, hname, USNAME, pname)
+   cmd = "pg_restore -d {} -h {} -U {} -w -j 16 -Fd {}".format(dname, hname, USNAME, pname)
    if not op.exists(pname):
       PgLOG.pglog(pname + ": Restoring local path not exists", ERRACT)
    elif not PgLOG.pgsystem(cmd, LOGACT, 257):
