@@ -11,6 +11,10 @@ spec:
   storage:
     size: {{ .Values.db.size }}
 
+  backup: 
+    # Keep 8 weekly backups
+    retentionPolicy: "8"
+    
   # Add TLS certificates for encrypted communication
   certificates:
     serverTLSSecret: {{ .Values.db.name }}-server-cert

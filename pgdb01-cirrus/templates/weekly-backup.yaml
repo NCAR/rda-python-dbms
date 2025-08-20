@@ -16,6 +16,3 @@ spec:
   
   target: primary
   method: volumeSnapshot 
-  
-  # Keep 8 weekly backups
-  retentionPolicy: "8"
