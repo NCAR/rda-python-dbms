@@ -1,0 +1,21 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ .Values.db.name }}-weekly-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.db.name }}
+spec:
+  # Schedule: Every Friday at 11:00 PM
+  schedule: "0 23 * * 5"
+  
+  backupOwnerReference: self
+  
+  cluster:
+    name: {{ .Values.db.name }}
+  
+  target: primary
+  method: volumeSnapshot 
+  
+  # Keep 8 weekly backups
+  retentionPolicy: "8"
