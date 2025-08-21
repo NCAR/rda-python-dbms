@@ -56,11 +56,12 @@ def main():
       print("  -d - PostgreSQL database name to dump at the current directory")
       print("  -h - Hostname the PostgreSQL server is running on")
       print("  -p - Local relative path to dump the database, defaults to <DBNAME>_backup_<TODAY>")
-         
+      sys.exit(0)
+   
    PgLOG.cmdlog("pgdbdump {}".format(' '.join(argv)))
-   pg_database_dbdump(dname, hname)
-
    if not pname: pname = "{}_backup_{}".format(dname, PgUtil.curdate())
+   pg_database_dbdump(dname, hname, pname)
+
    title = "pgdbdump: {}:{}".format(hname, dname, pname)
    tmsg = "{} to {} under {}!".format(title, pname, os.getcwd())
    PgLOG.set_email(tmsg, PgLOG.EMLTOP)
@@ -73,7 +74,7 @@ def main():
 #
 def pg_database_dbdump(dname, hname, pname):
    
-   cmd = "pg_dump {} -h {} -U {} -w -Fd -j 12 -f {}/".format(dname, hname, USNAME, pname)
+   cmd = "pg_dump {} -h {} -U {} -w -Fd -j 16 -f {}/".format(dname, hname, USNAME, pname)
    if op.exists(pname):
       PgLOG.pglog(pname + ": Dumping directory exists, remove it", ERRACT)
    elif not PgLOG.pgsystem(cmd, LOGACT, 257):
