@@ -9,3 +9,7 @@ db:
     replicationUserKey: repuser
     replicationPassKey: reppass
     secretPath: gdex/pgdb02
+  resource:
+    limits:
+      cpu: '16'
+      memory: 128Gi

@@ -10,6 +10,10 @@ spec:
   instances: {{ .Values.db.instances }}
   storage:
     size: {{ .Values.db.size }}
+  resources:
+    limits:
+      cpu: {{ .Values.db.resource.limits.cpu }}
+      memory: {{ .Values.db.resource.limits.memory }}
 
   backup: 
     # Keep 8 weekly backups
