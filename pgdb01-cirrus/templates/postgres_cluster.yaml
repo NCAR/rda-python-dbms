@@ -20,11 +20,6 @@ spec:
     serverTLSSecret: {{ .Values.db.name }}-server-cert
     serverCASecret: {{ .Values.db.name }}-server-cert
 
-  # Allow outside hosts to connect to the database
-  postgresql:
-    pg_hba:
-      - "host all all 0.0.0.0/0 md5"
-
   # Enable superuser access
   enableSuperuserAccess: true
   
@@ -105,3 +100,6 @@ spec:
       
       # Remote replication
       - host replication all 128.117.0.0/16 trust
+
+      # Remote replication from Kubernetes pod network
+      - host replication all 10.0.0.0/16 trust
