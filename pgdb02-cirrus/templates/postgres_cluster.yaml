@@ -11,13 +11,13 @@ spec:
   storage:
     size: {{ .Values.db.size }}
 
-  #bootstrap:
-  #  pg_basebackup:
-  #    source: pgdb01-external
+  bootstrap:
+    pg_basebackup:
+      source: pgdb01-external
       
-  #replica:
-  #  enabled: true
-  #  source: pgdb01-external
+  replica:
+    enabled: true
+    source: pgdb01-external
 
   externalClusters:
   - name: pgdb01-external
