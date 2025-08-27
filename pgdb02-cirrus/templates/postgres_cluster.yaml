@@ -12,7 +12,7 @@ spec:
     size: {{ .Values.db.size }}
   resources:
     limits:
-      cpu: {{ .Values.db.resource.limits.cpu }}
+      cpu: {{ .Values.db.resource.limits.cpu | quote }}
       memory: {{ .Values.db.resource.limits.memory }}
 
   bootstrap:
