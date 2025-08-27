@@ -9,5 +9,5 @@ db:
     secretPath: gdex/pgdb01
   resource:
     limits:
-      cpu: '16'
+      cpu: 16
       memory: 128Gi
