@@ -34,11 +34,6 @@ spec:
     serverTLSSecret: {{ .Values.db.name }}-server-cert
     serverCASecret: {{ .Values.db.name }}-server-cert
 
-  # Allow outside hosts to connect to the database
-  postgresql:
-    pg_hba:
-      - "host all all 0.0.0.0/0 md5"
-
   # Enable superuser access
   enableSuperuserAccess: true
   
@@ -47,7 +42,6 @@ spec:
     name: "{{ .Values.db.name }}-superuser"
     
   # Allow outside hosts to connect to the database
-  postgresql:
   postgresql:
     parameters:
       # Connection settings
