@@ -6,9 +6,6 @@ metadata:
   labels:
     app: {{ .Values.db.name }}
     group: {{ .Values.db.group }}
-  annotations:
-    cnpg.io/reconcileAt: '2025-08-27T16:45:00Z'
-    cnpg.io/reloadAt: '2025-08-27T16:45:00Z'
 spec:
   instances: {{ .Values.db.instances }}
   storage:
