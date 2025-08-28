@@ -15,10 +15,6 @@ spec:
       cpu: {{ .Values.db.resource.limits.cpu | quote }}
       memory: {{ .Values.db.resource.limits.memory }}
 
-  backup: 
-    # Keep 8 weekly backups
-    retentionPolicy: "8w"
-
   # Add TLS certificates for encrypted communication
   certificates:
     serverTLSSecret: {{ .Values.db.name }}-server-cert
@@ -61,7 +57,7 @@ spec:
       max_wal_senders: "6"
       max_replication_slots: "6"
       wal_keep_size: "1024MB"
-      max_slot_wal_keep_size: "-1"
+      max_slot_wal_keep_size: "100GB"
       max_standby_archive_delay: "-1"
       max_standby_streaming_delay: "-1"
       

@@ -15,6 +15,10 @@ spec:
       cpu: {{ .Values.db.resource.limits.cpu | quote }}
       memory: {{ .Values.db.resource.limits.memory }}
 
+  backup: 
+    # Keep 8 weekly backups
+    retentionPolicy: "8w"
+
   bootstrap:
     pg_basebackup:
       source: pgdb01-external
