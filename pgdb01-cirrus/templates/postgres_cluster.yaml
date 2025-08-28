@@ -60,8 +60,8 @@ spec:
       # Replication settings
       max_wal_senders: "6"
       max_replication_slots: "6"
-      wal_keep_size: "2GB"
-      max_slot_wal_keep_size: "10GB"
+      wal_keep_size: "512MB"
+      max_slot_wal_keep_size: "-1"
       max_standby_archive_delay: "-1"
       max_standby_streaming_delay: "-1"
       
