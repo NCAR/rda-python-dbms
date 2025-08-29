@@ -1,7 +1,7 @@
 db:
   name: pgdb01
   group: pgdb01
-  instances: 3
+  instances: 2
   size: 8000Gi
   superUser:
     usernameKey: username
