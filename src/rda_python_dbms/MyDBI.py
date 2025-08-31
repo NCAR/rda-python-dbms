@@ -232,7 +232,7 @@ def aborttran():
 #
 # record error message to dscheck record and clean the lock
 #
-def record_dscheck_error(errmsg, logact = (PGDBI['LOGACT']|PgLOG.EXITLG)):
+def record_dscheck_error(errmsg, logact = (MYDBI['LOGACT']|PgLOG.EXITLG)):
 
    cnd = PgLOG.PGLOG['DSCHECK']['chkcnd']
    if PgLOG.PGLOG['NOQUIT']: PgLOG.PGLOG['NOQUIT'] = 0
