@@ -232,13 +232,13 @@ def aborttran():
 #
 # record error message to dscheck record and clean the lock
 #
-def record_dscheck_error(errmsg):
+def record_dscheck_error(errmsg, logact = (PGDBI['LOGACT']|PgLOG.EXITLG)):
 
    cnd = PgLOG.PGLOG['DSCHECK']['chkcnd']
    if PgLOG.PGLOG['NOQUIT']: PgLOG.PGLOG['NOQUIT'] = 0
    dflags = PgLOG.PGLOG['DSCHECK']['dflags']
 
-   myrec = myget("dscheck", "mcount, tcount, lockhost, pid", cnd, PgLOG.LGEREX)
+   myrec = myget("dscheck", "mcount, tcount, lockhost, pid", cnd, logact)
    if not myrec: return 0
    if not myrec['pid'] and not myrec['lockhost']: return 0
    (chost, cpid) = PgLOG.current_process_info()
@@ -247,8 +247,9 @@ def record_dscheck_error(errmsg):
    # update dscheck record only if it is still locked by the current process
    record = {}
    record['chktime'] = int(time.time())
-   record['status'] = "E"
-   record['pid'] = 0   # release lock
+   if logact&PgLOG.EXITLG:
+      record['status'] = "E"
+      record['pid'] = 0   # release lock
    if dflags:
       record['dflags'] = dflags
       record['mcount'] = myrec['mcount'] + 1
@@ -260,7 +261,7 @@ def record_dscheck_error(errmsg):
       if myrec['tcount'] > 1: errmsg = "Try {}: {}".format(myrec['tcount'], errmsg)
       record['errmsg'] = errmsg
 
-   return myupdt("dscheck", record, cnd, MYDBI['LOGACT'])
+   return myupdt("dscheck", record, cnd, logact)
 
 #
 # local function to log query error
@@ -286,7 +287,7 @@ def qelog(myerr, sleep, sqlstr, vals, mycnt, logact = 0):
    if vals: sqlstr += " with values: " + str(vals)
 
    if myerr.errno: sqlstr = "{}{}".format(str(myerr), sqlstr)
-   if logact&PgLOG.EXITLG and PgLOG.PGLOG['DSCHECK']: record_dscheck_error(sqlstr)
+   if logact&PgLOG.EXITLG and PgLOG.PGLOG['DSCHECK']: record_dscheck_error(sqlstr, logact)
    PgLOG.pglog(sqlstr, logact)
    if sleep: time.sleep(sleep)
 

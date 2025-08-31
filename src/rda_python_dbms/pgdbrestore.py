@@ -31,7 +31,7 @@ SNDACT = PgLOG.LOGWRN|PgLOG.SNDEML
 def main():
 
    # check command line for options
-   PgLOG.PGLOG['LOGFILE'] = "pgbachup.log"   # set log file
+   PgLOG.PGLOG['LOGFILE'] = "pgbackup.log"   # set log file
    argv = sys.argv[1:]
    pname = hname = dname = option = None
    override = False

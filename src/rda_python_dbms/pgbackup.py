@@ -30,7 +30,7 @@ DBBACKS = []
 
 SCHOST = 'rda-pgdb-02.ucar.edu'
 SCDB = 'rdadb'
-SCBACKS = ['dssdb', 'citation', 'images', 'metautil', 'search', 'wagtail',
+SCBACKS = ['dssdb', 'citation', 'images', 'metautil', 'search', 'wagtail2',
            'writable', 'IGrML', 'IObML', 'VFixML', 'VGrML', 'VObML',
            'VSatML', 'WFixML', 'WGrML', 'WObML', 'WSatML', ]
 
