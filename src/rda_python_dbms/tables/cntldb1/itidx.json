@@ -16,7 +16,7 @@
       "comment": "icoads record id"
     },
     {
-      "name": "uid",
+      "name": "suid",
       "type": "char(4)",
       "comment": "last 4 chars of Report ID"
     },
