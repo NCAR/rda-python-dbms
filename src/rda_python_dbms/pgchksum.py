@@ -125,7 +125,11 @@ def main():
 
    if not PGSUM['p']: PGSUM['p'] = PgLOG.PGLOG['UPDTWKP']+ "/pgchksum"
    PgFile.change_local_directory(PGSUM['p'], PVALS['emlerr'])
-   
+
+   if PGSUM['d']:
+      if PGSUM['r'] > 0: PgCMD.set_one_boption('qoptions', "-l walltime={}:00:00".format(PGSUM['r']))
+      PgCMD.init_dscheck(0, '', pgname, '', 'C'+PGSUM['t'], '', None, PGSUM['d'])
+
    if PGSUM['t'] == 'W':
       cnt = get_checksum_wfilelist() 
    elif PGSUM['t'] == 'S':
@@ -134,11 +138,11 @@ def main():
       cnt = get_checksum_bfilelist() 
    else:
       PgLOG.pglog(PGSUM['t'] + ": Unknown File Type", PgLOG.LGEREX)
-   
+
    if PGSUM['d']:
       if PGSUM['r'] > 0: PgCMD.set_one_boption('qoptions', "-l walltime={}:00:00".format(PGSUM['r']))
-      PgCMD.init_dscheck(0, '', pgname, '', 'CS', '', None, PGSUM['d'])
-   
+      PgCMD.init_dscheck(0, '', pgname, '', 'C'+PGSUM['t'], '', None, PGSUM['d'])
+
    if cnt:
       fcnt = PGSUM['c']
       pgrecs = PGSUM['f']
@@ -434,7 +438,7 @@ def evaluate_backfile_checksum(fcnt, pgrecs, cnts):
 
       pgrec = PgUtil.onerecord(pgrecs, i)
       fname = "/{}/{}".format(pgrec['dsid'], pgrec['bfile'])
-      evaluate_quasar_file(fname, pgrec, 'rda-quasar', cnts)
+      evaluate_quasar_file(fname, pgrec, 'gdex-quasar', cnts)
 
 #
 # evaluate a disk file
