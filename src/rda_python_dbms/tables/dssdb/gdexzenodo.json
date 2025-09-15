@@ -2,7 +2,7 @@
   "header": {
     "author": "Zaihua Ji, zji@ucar.edu",
     "date": "09/05/2005",
-    "description": "table of gdex data usage information tranferred to Zenedo"
+    "description": "table of gdex data usage information tranferred to Zenodo"
   },
   "database": "rdadb",
   "schema": "dssdb",
@@ -19,7 +19,7 @@
     {
       "name": "zdsid",
       "type": "varchar(20)",
-      "comment": "reference to xenedo dsid"
+      "comment": "reference to zenodo dsid"
     },
     {
       "name": "date",
@@ -64,9 +64,9 @@
       "column": "date"
     },
     {
-      "name": "gdexzenedo_idx_2",
+      "name": "gdexzenodo_idx_2",
       "column": "zdsid"
     }
   ],
-  "comment": "ZENEDO DATA USAGE"
+  "comment": "ZENODO DATA USAGE"
 }
