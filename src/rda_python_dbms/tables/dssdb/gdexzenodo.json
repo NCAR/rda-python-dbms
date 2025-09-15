@@ -7,7 +7,7 @@
   "database": "rdadb",
   "schema": "dssdb",
   "name": "gdexzenodo",
-  "pkey": "aidx",
+  "pkey": "zidx",
   "column": [
     {
       "name": "zidx",
