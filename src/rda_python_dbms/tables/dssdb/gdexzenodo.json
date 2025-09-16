@@ -43,14 +43,15 @@
       "comment": "bytes of data accessed"
     },
     {
+      "name": "fcount",
+      "type": "int",
+      "default": "0",
+      "comment": "count of file accessed"
+    },
+    {
       "name": "method",
       "type": "varchar(20)",
       "comment": "delv. methods: MSS,Web,Ftp,Tape,Cd,Disk,Paper,cArt,Micro"
-    },
-    {
-      "name": "source",
-      "type": "char(1)",
-      "comment": "W - wusage, M - mssusage, O - ordusage"
     },
     {
       "name": "ip",
