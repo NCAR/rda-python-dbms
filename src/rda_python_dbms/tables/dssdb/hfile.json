@@ -100,6 +100,12 @@
       "comment": "Public or Internal"
     },
     {
+      "name": "fileflag",
+      "type": "char(1)",
+      "default": "'F'",
+      "comment": "file flag: F-File, P-Path"
+    },
+    {
       "name": "disp_order",
       "type": "int",
       "comment": "display order of the files in a dataset"
