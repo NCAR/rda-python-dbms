@@ -90,6 +90,12 @@
       "comment": "Public, Internal & Deleted"
     },
     {
+      "name": "fileflag",
+      "type": "char(1)",
+      "default": "'F'",
+      "comment": "file flag: F-File, P-Path"
+    },
+    {
       "name": "gindex",
       "type": "int",
       "default": "0",
