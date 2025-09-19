@@ -22,7 +22,7 @@
     },
     {
       "name": "countryName",
-      "type": "varchar(45)",
+      "type": "varchar(50)",
       "notnull": "NOT NULL",
       "default": "''"
     },
