@@ -42,7 +42,7 @@
     },
     {
       "name": "country",
-      "type": "varchar(30)",
+      "type": "varchar(50)",
       "comment": "country name"
     },
     {
