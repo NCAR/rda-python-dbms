@@ -13,3 +13,5 @@ db:
     limits:
       cpu: '16'
       memory: 128Gi
+  backups:
+    secretPath: gdex/boreas
