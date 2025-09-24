@@ -14,4 +14,10 @@ db:
       cpu: '16'
       memory: 128Gi
   backups:
-    secretPath: gdex/boreas
+    volumeSnapshot:
+      snapshotClassName: csi-rbdplugin-snapclass
+    s3:
+      secretName: backup-s3-creds
+      endpointURL: https://boreas.hpc.ucar.edu:6443
+      destinationPath: s3://pgdb02/
+      secretPath: gdex/boreas
