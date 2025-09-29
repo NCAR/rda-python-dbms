@@ -50,7 +50,7 @@ def main():
             PgLOG.pglog(arg + ": Invalid Option", PgLOG.LGWNEX)
       elif opt:
          if isinstance(PVALS[opt], list):
-            PVALS[option].append(arg)
+            PVALS[opt].append(arg)
          elif isinstance(PVALS[opt], int):
             PVALS[opt] = int(arg)
             opt = None
@@ -119,7 +119,7 @@ def transfer_schema(sc, tables):
    if not PgLOG.pgsystem(cmd, PgLOG.LOGWRN, 5):
       PgLOG.pglog("{db}.{sc}: Error restoring schema", PgLOG.LGEREX)
 
-def get_table_optionss(tables):
+def get_table_options(tables):
 
    tstr = ''
    for tb in tables: tstr += " -t {}".format(PgDBI.pgname(tb))
