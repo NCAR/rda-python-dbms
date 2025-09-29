@@ -41,6 +41,8 @@ spec:
     pg_basebackup:
       source: pgdb01-external
       
+  monitoring:
+    enablePodMonitor: true
   replica:
     enabled: true
     source: pgdb01-external
