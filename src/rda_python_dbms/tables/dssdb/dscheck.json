@@ -152,8 +152,8 @@
     {
       "name": "pbsqueue",
       "type": "char(3)",
-      "default": "'rda'",
-      "comment": "Queue (rda or htc) used for the PBS batch job"
+      "default": "'gdex'",
+      "comment": "Queue (gdex or htc) used for the PBS batch job"
     },
     {
       "name": "bid",

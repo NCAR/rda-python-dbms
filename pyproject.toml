@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rda_python_dbms"
-version = "1.0.24"
+version = "1.0.25"
 authors = [
   { name="Zaihua Ji", email="zji@ucar.edu" },
 ]
@@ -34,3 +34,4 @@ pgdbdump = "rda_python_dbms.pgdbdump:main"
 pgdbrestore = "rda_python_dbms.pgdbrestore:main"
 pgchksum = "rda_python_dbms.pgchksum:main"
 pgcmptables = "rda_python_dbms.pgcmptables:main"
+pgschema = "rda_python_dbms.pgschema:main"
