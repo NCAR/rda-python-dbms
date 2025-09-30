@@ -14,6 +14,26 @@ spec:
     limits:
       cpu: {{ .Values.db.resource.limits.cpu | quote }}
       memory: {{ .Values.db.resource.limits.memory }}
+  
+  {{- if .Values.db.backups }}
+  backup: 
+    {{- if .Values.db.backups.volumeSnapshot }}
+    volumeSnapshot:
+      className: {{ .Values.db.backups.volumeSnapshot.snapshotClassName }}
+    {{- end }}
+    {{- if .Values.db.backups.s3 }}
+    barmanObjectStore:
+      destinationPath: {{ .Values.db.backups.s3.destinationPath }}
+      endpointURL: {{ .Values.db.backups.s3.endpointURL }}
+      s3Credentials:
+          accessKeyId:
+            name: {{ .Values.db.backups.s3.secretName }}
+            key: access_key
+          secretAccessKey:
+            name: {{ .Values.db.backups.s3.secretName }}
+            key: secret_key
+    {{- end }}
+    {{- end }}
 
   # Add TLS certificates for encrypted communication
   certificates:
