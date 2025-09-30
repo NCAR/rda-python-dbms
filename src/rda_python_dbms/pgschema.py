@@ -66,7 +66,9 @@ def main():
    if not sc:
       print("Dump all or specified tables in a Schema in the current directory; Restore")
       print("Restore the dumped schema to a different Database with the same schema name.")
-      print("Existing Schema and tables in the target database will not be overriden.")
+      print("Existing tables in the target database.schema will not be overriden. If the")
+      print("target schema exists already, try to login to the new database to drop the")
+      print("schema: 'drop schema SchemaName cascade;', for a fresh new schema stransfer.")
       print("Usage:\npgschema [-b] [-m PMAX] [-ht HOSTNAME] [-db DATABASE] -sc SCHEMA  \\")
       print("      [-nd NEWDATABASE] [-us USERNAME] [-tb TABLES] [-pn PORTNO]")
       print("  Option -tb - specify the table names, use wildcard '*' to match mutiple tables")
@@ -115,9 +117,15 @@ def transfer_schema(sc, tables):
       PgLOG.pglog("{db}.{sc}: Error dumping schema", PgLOG.LGEREX)
 
    # restore schema
-   cmd = f"pg_restore -d {nd} -h {PVALS['ht']} -n {sc}{tstr} -U {PVALS['us']} -w -j {PVALS['mp']} -Fd {dumpdir}"
+   cmd = f"psql {nd} -h {PVALS['ht']} -U {PVALS['us']} -c 'CREATE SCHEMA IF NOT EXISTS {PVALS['pgsc']}'"
+   PgLOG.pgsystem(cmd, PgLOG.LOGWRN, 7)
+   cmd = f"pg_restore -d {nd} -h {PVALS['ht']}{tstr} -U {PVALS['us']} -w -j {PVALS['mp']} -Fd {dumpdir}"
    if not PgLOG.pgsystem(cmd, PgLOG.LOGWRN, 5):
       PgLOG.pglog("{db}.{sc}: Error restoring schema", PgLOG.LGEREX)
+
+   # remove dumped directory
+   cmd = f"rm -rf {dumpdir}"
+   PgLOG.pgsystem(cmd, PgLOG.LOGWRN, 7)
 
 def get_table_options(tables):
 
