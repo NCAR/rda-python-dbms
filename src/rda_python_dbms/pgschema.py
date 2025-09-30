@@ -127,7 +127,7 @@ def transfer_schema(sc, tables):
    # restore schema
    dbsc = f"{nd}.{sc}: "
    cmd = f"pg_restore -d {nd} -h {PVALS['ht']}{topt} -U {PVALS['us']} -w -j {PVALS['mp']} -Fd {dumpdir}"
-   if PgLOG.pgsystem(cmd, PgLOG.LOGWRN, 4):
+   if PgLOG.pgsystem(cmd, PgLOG.LOGWRN, 6):
       msg = f"Schema Restored from {dumpdir}"
       logact = PgLOG.LOGWRN
       PgLOG.pglog(dbsc + msg + tstr, logact)
