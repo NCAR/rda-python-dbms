@@ -125,24 +125,12 @@ def transfer_schema(sc, tables):
    PgLOG.pglog(dbsc + msg + tstr, logact)
 
    # restore schema
-   pgsc = PVALS['pgsc']
    dbsc = f"{nd}.{sc}: "
-   cmd = f"psql {nd} -h {PVALS['ht']} -U {PVALS['us']} -c 'CREATE SCHEMA IF NOT EXISTS {pgsc}'"
-   if PgLOG.pgsystem(cmd, PgLOG.LOGWRN, 4):
-      msg = "Schema Created"
-      logact = PgLOG.LOGWRN
-   else:
-      msg = "Error creating schema"
-      logact = PgLOG.LGEREX
-   PgLOG.pglog(dbsc + msg + tstr, logact)
    cmd = f"pg_restore -d {nd} -h {PVALS['ht']}{topt} -U {PVALS['us']} -w -j {PVALS['mp']} -Fd {dumpdir}"
-   if not PgLOG.pgsystem(cmd, PgLOG.LOGWRN, 5):
+   if PgLOG.pgsystem(cmd, PgLOG.LOGWRN, 6):
       msg = f"Schema Restored from {dumpdir}"
       logact = PgLOG.LOGWRN
-   else:
-      msg = "Error restoring schema"
-      logact = PgLOG.LGEREX
-   PgLOG.pglog(dbsc + msg + tstr, logact)
+      PgLOG.pglog(dbsc + msg + tstr, logact)
 
    # remove dumped directory
    cmd = f"rm -rf {dumpdir}"
@@ -151,10 +139,12 @@ def transfer_schema(sc, tables):
       logact = PgLOG.LOGWRN
    else:
       msg = "Error removing directory"
-      logact = PgLOG.LGEREX
+      logact = PgLOG.LOGERR
    PgLOG.pglog(f"{dumpdir}: {msg}", logact)
 
-
+#
+# add -t in front of each table
+#
 def get_table_options(tables):
 
    tstr = ''
