@@ -23,6 +23,10 @@ spec:
     {{- end }}
     {{- if .Values.db.backups.s3 }}
     barmanObjectStore:
+      wal:
+        compression: bzip2
+      data:
+        compression: bzip2
       destinationPath: {{ .Values.db.backups.s3.destinationPath }}
       endpointURL: {{ .Values.db.backups.s3.endpointURL }}
       s3Credentials:
