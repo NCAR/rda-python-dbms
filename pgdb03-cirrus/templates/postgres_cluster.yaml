@@ -55,8 +55,8 @@ spec:
       min_wal_size: "512MB"
       
       # Replication settings
-      max_wal_senders: "3"
-      max_replication_slots: "3"
+      max_wal_senders: "6"
+      max_replication_slots: "6"
       wal_keep_size: "4GB"
       max_slot_wal_keep_size: "-1"
       max_standby_archive_delay: "-1"
