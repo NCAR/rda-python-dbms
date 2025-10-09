@@ -27,7 +27,7 @@ spec:
 
   externalClusters:
   - name: pgdb03-external
-    connectionParameteres:
+    connectionParameters:
       host: pgdb03.k8s.ucar.edu
       user: "rep1"
       sslmode: prefer
