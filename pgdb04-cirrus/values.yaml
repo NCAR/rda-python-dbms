@@ -1,0 +1,15 @@
+db:
+  name: pgdb04
+  group: pgdb04
+  instances: 1
+  size: 9000Gi
+  superUser:
+    usernameKey: username
+    passwordKey: password
+    replicationUserKey: repuser
+    replicationPassKey: reppass
+    secretPath: gdex/pgdb04
+  resource:
+    limits:
+      cpu: '16'
+      memory: 128Gi
