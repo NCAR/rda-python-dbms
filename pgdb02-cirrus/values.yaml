@@ -17,7 +17,7 @@ db:
     volumeSnapshot:
       snapshotClassName: csi-rbdplugin-snapclass
     s3:
-      secretName: backup-s3-creds
-      endpointURL: https://boreas.hpc.ucar.edu:6443
+      secretName: backup-rgw-creds
+      endpointURL: https://s3.k8s.ucar.edu:5443
       destinationPath: s3://pgdb02/
       secretPath: gdex/boreas
