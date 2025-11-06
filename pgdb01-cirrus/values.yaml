@@ -12,9 +12,3 @@ db:
       cpu: '16'
       memory: 128Gi
 
-  backups:
-    s3:
-      secretName: backup-s3-creds
-      endpointURL: https://boreas.hpc.ucar.edu:6443
-      destinationPath: s3://pgdb01/
-      secretPath: gdex/boreas
