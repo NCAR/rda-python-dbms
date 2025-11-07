@@ -21,7 +21,7 @@ spec:
     volumeSnapshot:
       className: {{ .Values.db.backups.volumeSnapshot.snapshotClassName }}
     {{- end }}
-    {{- if .Values.db.backups.s3 }}
+    {{- if .Values.db.backups.s3.enabled }}
     barmanObjectStore:
       wal:
         compression: bzip2

@@ -11,4 +11,7 @@ db:
     limits:
       cpu: '16'
       memory: 128Gi
-
+  
+  backups:
+    s3:
+      enabled: false
