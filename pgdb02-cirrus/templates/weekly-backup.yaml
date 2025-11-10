@@ -1,3 +1,4 @@
+{{- if .Values.db.backups.volumeSnapshot.enabled }}
 apiVersion: postgresql.cnpg.io/v1
 kind: ScheduledBackup
 metadata:
@@ -16,3 +17,4 @@ spec:
   
   target: primary
   method: volumeSnapshot 
+{{- end }}

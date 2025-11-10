@@ -15,8 +15,10 @@ db:
       memory: 128Gi
   backups:
     volumeSnapshot:
+      enabled: true
       snapshotClassName: csi-rbdplugin-snapclass
     s3:
+      enabled: false
       secretName: backup-rgw-creds
       endpointURL: https://s3.k8s.ucar.edu:5443
       destinationPath: s3://pgdb02/

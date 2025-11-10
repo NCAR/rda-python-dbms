@@ -15,12 +15,13 @@ spec:
       cpu: {{ .Values.db.resource.limits.cpu | quote }}
       memory: {{ .Values.db.resource.limits.memory }}
 
+  {{- if .Values.db.backups }}
   backup: 
-    {{- if .Values.db.backups.volumeSnapshot }}
+    {{- if .Values.db.backups.volumeSnapshot.enabled }}
     volumeSnapshot:
       className: {{ .Values.db.backups.volumeSnapshot.snapshotClassName }}
     {{- end }}
-    {{- if .Values.db.backups.s3 }}
+    {{- if .Values.db.backups.s3.enabled }}
     barmanObjectStore:
       destinationPath: {{ .Values.db.backups.s3.destinationPath }}
       endpointURL: {{ .Values.db.backups.s3.endpointURL }}
@@ -31,6 +32,7 @@ spec:
           secretAccessKey:
             name: {{ .Values.db.backups.s3.secretName }}
             key: secret_key
+    {{- end }}
     {{- end }}
 
 
@@ -103,6 +105,7 @@ spec:
       max_slot_wal_keep_size: "-1"
       max_standby_archive_delay: "-1"
       max_standby_streaming_delay: "-1"
+      primary_slot_name: "stream_slot"
       
       # Logging settings
       logging_collector: "on"
