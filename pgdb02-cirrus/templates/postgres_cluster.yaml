@@ -39,6 +39,13 @@ spec:
     # Keep 8 weekly backups
     retentionPolicy: "8w"
 
+  plugins:
+  - enabled: true
+    isWALArchiver: false
+    name: barman-cloud.cloudnative-pg.io
+    parameters:
+      barmanObjectName: cirrus-s3
+
   bootstrap:
     pg_basebackup:
       source: pgdb01-external
