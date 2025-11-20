@@ -18,8 +18,8 @@ db:
       enabled: true
       snapshotClassName: csi-rbdplugin-snapclass
     s3:
-      enabled: false
+      enabled: true
       secretName: backup-rgw-creds
-      endpointURL: https://s3.k8s.ucar.edu:5443
-      destinationPath: s3://pgdb02/
+      endpointURL: https://boreas.hpc.ucar.edu:6443
+      destinationPath: s3://gdex
       secretPath: gdex/boreas
