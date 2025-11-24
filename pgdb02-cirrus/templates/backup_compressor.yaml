@@ -1,0 +1,40 @@
+{{- if .Values.db.backups.s3.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.db.name }}-s3-backup-compressor
+spec:
+  schedule: "0 8 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: compressor
+            image: hub.k8s.ucar.edu/khrpcek/backup-compressor:kmh
+            command: ["/multi_compress.sh"]
+            imagePullPolicy: Always
+            env:
+            - name: BASEDIR
+              value: "{{ .Values.db.backups.s3.destinationPath }}/{{ .Values.db.name }}/base/"
+            - name: AWS_ENDPOINT_URL
+              value: "{{ .Values.db.backups.s3.endpointURL }}"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.backups.s3.secretName }}
+                  key: access_key
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.backups.s3.secretName }}
+                  key: secret_key
+            resources:
+              requests:
+                memory: 12Gi
+                cpu: 30
+              limits:
+                memory: 16Gi
+                cpu: 32
+{{- end }}
