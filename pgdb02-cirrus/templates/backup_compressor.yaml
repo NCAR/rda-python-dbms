@@ -4,7 +4,7 @@ kind: CronJob
 metadata:
   name: {{ .Values.db.name }}-s3-backup-compressor
 spec:
-  schedule: "0 8 * * *"
+  schedule: "0 12 * * *"
   jobTemplate:
     spec:
       template:
