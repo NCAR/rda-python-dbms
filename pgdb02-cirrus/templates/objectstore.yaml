@@ -4,6 +4,7 @@ kind: ObjectStore
 metadata:
   name: boreas
 spec:
+  retentionPolicy: "14d"
   configuration:
     destinationPath: {{ .Values.db.backups.s3.destinationPath }}
     endpointURL: {{ .Values.db.backups.s3.endpointURL }}
