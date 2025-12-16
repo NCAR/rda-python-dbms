@@ -25,8 +25,8 @@ class PgSeq(PgDBI):
          'us' : '',
          'pw' : '',
       }
-      self.self.scnames = []
-      self.self.tbnames = []
+      self.scnames = []
+      self.tbnames = []
 
    # function to read parameters
    def read_parameters(self):
@@ -77,7 +77,7 @@ class PgSeq(PgDBI):
       self.cmdlog()
       sys.exit(0)
    
-   def reset_table_sequence(scname):
+   def reset_table_sequence(self, scname):
       us = self.SINFO['us'] if self.SINFO['us'] else scname
       pw = self.SINFO['pw'] if self.SINFO['pw'] else us
       self.default_scinfo(self.SINFO['db'], scname, self.SINFO['ht'], us, pw, self.SINFO['pt'])
