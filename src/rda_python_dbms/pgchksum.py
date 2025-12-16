@@ -18,6 +18,7 @@ from rda_python_common.pg_cmd import PgCMD
 from rda_python_common.pg_split import PgSplit
 
 class PgChksum(PgFile, PgCMD, PgSplit):
+
    def __init__(self):
       super().__init__()  # initialize parent class
       self.PGSUM = {
@@ -46,10 +47,11 @@ class PgChksum(PgFile, PgCMD, PgSplit):
          'begin' : 0,
          'end' : 0
       }
+      self.pgname = "pgchksum"
+      self.pgcmd = None
 
    # function to read parameters
    def read_parameters(self):
-      pgname = "pgchksum"
       argv = sys.argv[1:]
       option = None
       for arg in argv:
@@ -100,11 +102,11 @@ class PgChksum(PgFile, PgCMD, PgSplit):
       elif self.PGSUM['t'] not in 'QSW':
          self.pglog(self.PGSUM['t'] + ": Unknown File Type, must be one of 'QSW'", self.LGEREX)
        # set different log file
-      self.PGLOG['LOGFILE'] = pgname + '.log'
+      self.PGLOG['LOGFILE'] = self.pgname + '.log'
       self.set_suid(self.PGLOG['EUID'])
       self.PVALS['begin'] = int(time.time())
-      pgcmd = "{} {}".format(pgname, self.argv_to_string(argv, 1))
-      self.cmdlog("{} {}".format(pgcmd, self.PVALS['begin']))
+      self.pgcmd = "{} {}".format(self.pgname, self.argv_to_string(argv, 1))
+      self.cmdlog("{} {}".format(self.pgcmd, self.PVALS['begin']))
       if not self.PGSUM['n']:
          self.PVALS['emllog'] = self.LGWNEM
          self.PVALS['emlsum'] = self.LOGWRN|self.EMLSUM
@@ -118,7 +120,7 @@ class PgChksum(PgFile, PgCMD, PgSplit):
       self.change_local_directory(self.PGSUM['p'], self.PVALS['emlerr'])
       if self.PGSUM['d']:
          if self.PGSUM['r'] > 0: self.set_one_boption('qoptions', "-l walltime={}:00:00".format(self.PGSUM['r']))
-         self.init_dscheck(0, '', pgname, '', 'C'+self.PGSUM['t'], '', None, self.PGSUM['d'])
+         self.init_dscheck(0, '', self.pgname, '', 'C'+self.PGSUM['t'], '', None, self.PGSUM['d'])
       if self.PGSUM['t'] == 'W':
          cnt = self.get_checksum_wfilelist() 
       elif self.PGSUM['t'] == 'S':
@@ -129,7 +131,7 @@ class PgChksum(PgFile, PgCMD, PgSplit):
          self.pglog(self.PGSUM['t'] + ": Unknown File Type", self.LGEREX)
       if self.PGSUM['d']:
          if self.PGSUM['r'] > 0: self.set_one_boption('qoptions', "-l walltime={}:00:00".format(self.PGSUM['r']))
-         self.init_dscheck(0, '', pgname, '', 'C'+self.PGSUM['t'], '', None, self.PGSUM['d'])
+         self.init_dscheck(0, '', self.pgname, '', 'C'+self.PGSUM['t'], '', None, self.PGSUM['d'])
       if cnt:
          fcnt = self.PGSUM['c']
          pgrecs = self.PGSUM['f']
@@ -150,7 +152,7 @@ class PgChksum(PgFile, PgCMD, PgSplit):
             self.evaluate_backfile_checksum(fcnt, pgrecs, cnts)
          self.dump_progress(fcnt, fcnt, cnts, self.PVALS['emlsum'])
          self.PVALS['end'] = int(time.time())
-         if not self.PGSUM['n']: self.send_check_email(pgcmd, cnts['cnt'], fcnt)
+         if not self.PGSUM['n']: self.send_check_email(cnts['cnt'], fcnt)
       if self.PGLOG['DSCHECK']:
          if self.PGLOG['ERRMSG']:
             self.record_dscheck_error(self.PGLOG['ERRMSG'])
@@ -159,11 +161,11 @@ class PgChksum(PgFile, PgCMD, PgSplit):
       self.cmdlog(None, self.PVALS['end'])
 
    # send an email for checking result
-   def send_check_email(self, pgcmd, cnt, fcnt):
+   def send_check_email(self, cnt, fcnt):
       s = 'es' if cnt > 1 else ''
       cstr = 'With {} Mismatch{}'.format(cnt, s)
       subject = "PGCHKSUM for {} {} Files {}".format(self.PVALS['TYPE'], fcnt, cstr)
-      buf = self.cmd_execute_time(pgcmd, self.PVALS['end']-self.PVALS['begin']) + " Finished  on " + self.PGLOG['HOSTNAME']
+      buf = self.cmd_execute_time(self.pgcmd, self.PVALS['end']-self.PVALS['begin']) + " Finished  on " + self.PGLOG['HOSTNAME']
       if self.PVALS['CND']: buf += "\n{} Files: {}".format(self.PVALS['TYPE'], self.PVALS['CND'])   
       self.set_email(buf, self.EMLTOP)
       if self.PGLOG['DSCHECK']:

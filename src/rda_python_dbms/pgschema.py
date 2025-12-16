@@ -84,14 +84,16 @@ class PgSchema(PgUtil):
 
    # function to start actions
    def start_actions(self):
-      self.PVALS['pgsc'] = self.pgname(sc)
-      self.transfer_schema(sc, self.PVALS['tb'])
+      self.PVALS['pgsc'] = self.pgname(self.PVALS['sc'])
+      self.transfer_schema()
       self.cmdlog()
 
    # transfer a schema from one database to another
-   def transfer_schema(self, sc, tables):
+   def transfer_schema(self):
+      sc = self.PVALS['sc']
       db = self.PVALS['db']
       nd = self.PVALS['nd']
+      tables = self.PVALS['tb']
       topt = self.get_table_options(tables)
       # dump schema
       dumpdir = "{}_dump_{}".format(sc, self.curdate())

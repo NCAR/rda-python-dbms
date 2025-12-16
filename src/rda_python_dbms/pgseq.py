@@ -35,7 +35,7 @@ class PgSeq(PgDBI):
       argv = sys.argv[1:]
       for arg in argv:
          if arg == "-b":
-            self.MYLOG['BCKGRND'] = 1
+            self.PGLOG['BCKGRND'] = 1
          elif re.match(r'^-([cdhptuw])$', arg):
             option = arg[1]
          elif re.match(r'^-', arg):
