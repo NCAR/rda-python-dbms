@@ -29,7 +29,7 @@ class PgSeq(PgDBI):
       self.self.tbnames = []
 
    # function to read parameters
-   def read_parameters():
+   def read_parameters(self):
       option = None
       alltb = 0
       argv = sys.argv[1:]
@@ -71,7 +71,7 @@ class PgSeq(PgDBI):
       self.cmdlog("pgseq {}".format(' '.join(argv)))
    
    # function to start actions
-   def start_aactions(self):
+   def start_actions(self):
       for scname in self.scnames:
          self.reset_table_sequence(scname)
       self.cmdlog()
