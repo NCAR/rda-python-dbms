@@ -67,12 +67,13 @@ class PgDDL(PgDDLLib):
          'u' : 'lnname',
          'w' : 'pwname',
       }
+      self.tablenames = None
 
    # function to read parameters
    def read_parameters(self):
       option = 't'
       actopt = False
-      tablenames = action = None
+      action = None
       dbopt = getall = False
       argv = sys.argv[1:]
       for arg in argv:
@@ -135,23 +136,23 @@ class PgDDL(PgDDLLib):
          self.default_scinfo(self.DBINFO['dbname'], self.DBINFO['scname'], self.DBINFO['dbhost'],
                               self.DBINFO['lnname'], self.DBINFO['pwname'], self.DBINFO['dbport'])   
       if self.VALUES['TBL']:
-         tablenames = self.VALUES['TBL']
+         self.tablenames = self.VALUES['TBL']
       elif getall:
-         tablenames = self.allschematables();         # action on all tables
-      if not (tablenames and action): self.show_usage('pgddl')
+         self.tablenames = self.allschematables();         # action on all tables
+      if not (self.tablenames and action): self.show_usage('pgddl')
       self.PGLOG['LOGFILE'] = "pgddl.log"
       self.cmdlog("pgddl {}".format(' '.join(argv)))
 
-      # process all or given tables to add/drop table/pkey/index/reference/field
-      def start_actions(self):
-         act = self.PGACT['TBL'][0]
-         if act: self.process_tables(tablenames, act, 'TBL')
-         for opt in self.PGACT:
-            act = self.PGACT[opt][0]
-            if opt == 'TBL' or not act: continue
-            names = self.VALUES[opt] if opt in self.VALUES and self.VALUES[opt] else None
-            self.process_tables(tablenames, act, opt, names)
-         self.cmdlog()
+   # process all or given tables to add/drop table/pkey/index/reference/field
+   def start_actions(self):
+      act = self.PGACT['TBL'][0]
+      if act: self.process_tables(self.tablenames, act, 'TBL')
+      for opt in self.PGACT:
+         act = self.PGACT[opt][0]
+         if opt == 'TBL' or not act: continue
+         names = self.VALUES[opt] if opt in self.VALUES and self.VALUES[opt] else None
+         self.process_tables(self.tablenames, act, opt, names)
+      self.cmdlog()
 
 # main function to excecute this script
 def main():
