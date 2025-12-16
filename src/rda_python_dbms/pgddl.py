@@ -142,16 +142,16 @@ class PgDDL(PgDDLLib):
       self.PGLOG['LOGFILE'] = "pgddl.log"
       self.cmdlog("pgddl {}".format(' '.join(argv)))
 
-      # process all or given tables to add/drop table/pkey/index/reference/field
-      def start_actions(self):
-         act = self.PGACT['TBL'][0]
-         if act: self.process_tables(tablenames, act, 'TBL')
-         for opt in self.PGACT:
-            act = self.PGACT[opt][0]
-            if opt == 'TBL' or not act: continue
-            names = self.VALUES[opt] if opt in self.VALUES and self.VALUES[opt] else None
-            self.process_tables(tablenames, act, opt, names)
-         self.cmdlog()
+   # process all or given tables to add/drop table/pkey/index/reference/field
+   def start_actions(self):
+      act = self.PGACT['TBL'][0]
+      if act: self.process_tables(tablenames, act, 'TBL')
+      for opt in self.PGACT:
+         act = self.PGACT[opt][0]
+         if opt == 'TBL' or not act: continue
+         names = self.VALUES[opt] if opt in self.VALUES and self.VALUES[opt] else None
+         self.process_tables(tablenames, act, opt, names)
+      self.cmdlog()
 
 # main function to excecute this script
 def main():
