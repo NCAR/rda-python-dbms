@@ -13,11 +13,10 @@
 import sys
 import re
 import time
-from rda_python_common.pg_file import PgFile
 from rda_python_common.pg_cmd import PgCMD
 from rda_python_common.pg_split import PgSplit
 
-class PgChksum(PgFile, PgCMD, PgSplit):
+class PgChksum(PgCMD, PgSplit):
 
    def __init__(self):
       super().__init__()  # initialize parent class
@@ -86,7 +85,7 @@ class PgChksum(PgFile, PgCMD, PgSplit):
          print("                [-k SkipCount] [-o r|s] [-s Specialists]")
          print("  -b - background process and no screen output")
          print("  -c - File count to re-evaluate checksum; for all gathered files if not specified")
-         print("  -d - delayed mode background/batch processes on RDA machines/DAV SLURM nodes")
+         print("  -d - delayed mode background/batch processes on RDA machines/DAV PBS nodes")
          print("  -f - Re-evaluate the specify File names only")
          print("  -i - Dataset IDs the files belong; for all files if not specified")
          print("  -k - skip the given file count to re-evaluate checksum")
