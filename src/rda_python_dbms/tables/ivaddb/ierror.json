@@ -21,9 +21,10 @@
       "comment": "icoads record id"
     },
     {
-      "name": "uid",
-      "type": "char(6)",
-      "comment": "Report unique ID"
+      "name": "date",
+      "type": "date",
+      "notnull": "NOT NULL",
+      "comment": "UTC date of the record"
     },
     {
       "name": "icn",
@@ -68,7 +69,7 @@
     },
     {
       "name": "ierror_idx_2",
-      "column": "uid"
+      "column": "date"
     }
   ],
   "comment": "ICOADS IMMA unique ID attm"

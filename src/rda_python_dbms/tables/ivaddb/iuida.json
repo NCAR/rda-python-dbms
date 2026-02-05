@@ -16,9 +16,15 @@
       "comment": "icoads record id"
     },
     {
+      "name": "date",
+      "type": "date",
+      "notnull": "NOT NULL",
+      "comment": "UTC date of the record"
+    },
+    {
       "name": "uid",
       "type": "char(6)",
-      "comment": "Report unique ID"
+      "comment": "Report ID"
     },
     {
       "name": "rn1",
@@ -49,8 +55,12 @@
   "index": [
     {
       "name": "iuida_idx_1",
-      "column": "uid",
+      "column": "uid, rn3",
       "unique": "UNIQUE"
+    },
+    {
+      "name": "iuida_idx_2",
+      "column": "date"
     }
   ],
   "comment": "Unique Report ID attm"

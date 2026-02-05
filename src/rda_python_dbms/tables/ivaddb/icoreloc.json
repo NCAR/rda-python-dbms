@@ -16,11 +16,6 @@
       "comment": "icoads record id"
     },
     {
-      "name": "uid",
-      "type": "char(6)",
-      "comment": "Report unique ID"
-    },
-    {
       "name": "date",
       "type": "date",
       "notnull": "NOT NULL",
@@ -110,16 +105,11 @@
   "index": [
     {
       "name": "icoreloc_idx_1",
-      "column": "uid",
-      "unique": "UNIQUE"
+      "column": "date"
     },
     {
       "name": "icoreloc_idx_2",
-      "column": "date, hr"
-    },
-    {
-      "name": "icoreloc_idx_3",
-      "column": "lat, lon, date, hr"
+      "column": "lat, lon"
     }
   ],
   "comment": "ICOADS IMMA core location section"
