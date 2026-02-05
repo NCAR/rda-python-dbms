@@ -21,9 +21,10 @@
       "comment": "icoads record id"
     },
     {
-      "name": "uid",
-      "type": "char(6)",
-      "comment": "Report unique ID"
+      "name": "date",
+      "type": "date",
+      "notnull": "NOT NULL",
+      "comment": "UTC date of the record"
     },
     {
       "name": "icni",
@@ -122,7 +123,7 @@
     },
     {
       "name": "iivad_idx_3",
-      "column": "uid"
+      "column": "date"
     },
     {
       "name": "iivad_idx_4",

@@ -16,9 +16,10 @@
       "comment": "icoads record id"
     },
     {
-      "name": "uid",
-      "type": "char(6)",
-      "comment": "Report unique ID"
+      "name": "date",
+      "type": "date",
+      "notnull": "NOT NULL",
+      "comment": "UTC date of the record"
     },
     {
       "name": "di",
@@ -184,8 +185,7 @@
   "index": [
     {
       "name": "icorereg_idx_1",
-      "column": "uid",
-      "unique": "UNIQUE"
+      "column": "date"
     }
   ],
   "comment": "ICOADS IMMA core regular section"

@@ -21,9 +21,10 @@
       "comment": "icoads record id"
     },
     {
-      "name": "uid",
-      "type": "char(6)",
-      "comment": "Report unique ID"
+      "name": "date",
+      "type": "date",
+      "notnull": "NOT NULL",
+      "comment": "UTC date of the record"
     },
     {
       "name": "icnr",
@@ -98,11 +99,11 @@
     },
     {
       "name": "ireanqc_idx_2",
-      "column": "icnr, fnr"
+      "column": "date"
     },
     {
       "name": "ireanqc_idx_3",
-      "column": "uid"
+      "column": "icnr, fnr"
     },
     {
       "name": "ireanqc_idx_4",
