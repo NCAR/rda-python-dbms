@@ -4,7 +4,7 @@ metadata:
   name: cnpg-replication-alerts
   namespace: rda
   labels:
-    team: gdex-app-team
+    team: rda-app-team
 spec:
   groups:
   - name: cnpg.replication
@@ -16,11 +16,11 @@ spec:
       for: 15m
       labels:
         severity: warning
-        team: gdex-app-team
+        team: rda-app-team
         namespace: rda
       annotations:
-        summary: "CNPG replication lag high on {{ $labels.pod }}"
-        description: "Replication lag is {{ $value }} WAL segments behind on {{ $labels.pod }} in cluster {{ $labels.cluster }}"
+        summary: "CNPG replication lag high on {{ `{{` }} $labels.pod {{ `}}` }}"
+        description: "Replication lag is {{ `{{` }} $value {{ `}}` }} WAL segments behind on {{ `{{` }} $labels.pod {{ `}}` }} in cluster {{ `{{` }} $labels.cluster {{ `}}` }}"
 
     - alert: CNPGReplicationBroken
       expr: |
@@ -28,11 +28,11 @@ spec:
       for: 5m
       labels:
         severity: critical
-        team: gdex-app-team
+        team: rda-app-team
         namespace: rda
       annotations:
-        summary: "CNPG replication broken for {{ $labels.cluster }}"
-        description: "Cluster {{ $labels.cluster }} has no streaming replicas. Replication may be broken."
+        summary: "CNPG replication broken for {{ `{{` }} $labels.cluster {{ `}}` }}"
+        description: "Cluster {{ `{{` }} $labels.cluster {{ `}}` }} has no streaming replicas. Replication may be broken."
 
     - alert: CNPGClusterNotHealthy
       expr: |
@@ -40,8 +40,8 @@ spec:
       for: 5m
       labels:
         severity: critical
-        team: gdex-app-team
+        team: rda-app-team
         namespace: rda
       annotations:
-        summary: "CNPG cluster {{ $labels.cluster }} is not healthy"
-        description: "The CNPG exporter for cluster {{ $labels.cluster }} is down, indicating cluster health issues"
+        summary: "CNPG cluster {{ `{{` }} $labels.cluster {{ `}}` }} is not healthy"
+        description: "The CNPG exporter for cluster {{ `{{` }} $labels.cluster {{ `}}` }} is down, indicating cluster health issues"
