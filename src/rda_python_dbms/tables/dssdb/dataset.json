@@ -130,6 +130,12 @@
       "comment": "web file access location flag: Glade or Object"
     },
     {
+      "name": "taccflag",
+      "type": "char(1)",
+      "default": "'N'",
+      "comment": "tacc backup flag: B-Backup"
+    },
+    {
       "name": "backflag",
       "type": "char(1)",
       "default": "'N'",
