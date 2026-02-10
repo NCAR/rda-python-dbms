@@ -120,6 +120,12 @@
       "comment": "if > 0, point to backup file with bid"
     },
     {
+      "name": "tid",
+      "type": "int",
+      "default": "0",
+      "comment": "if > 0, point to tacc file with tid"
+    },
+    {
       "name": "thredd_link",
       "type": "char(1)",
       "comment": "Y to link to file Thredd catalog"
@@ -161,6 +167,10 @@
     {
       "name": "wfile_idx_6",
       "column": "bid"
+    },
+    {
+      "name": "wfile_idx_7",
+      "column": "tid"
     }
   ],
   "comment": "WEB DATA FILES"
