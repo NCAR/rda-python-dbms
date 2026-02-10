@@ -1,0 +1,47 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cnpg-replication-alerts
+  namespace: rda
+  labels:
+    team: gdex-app-team
+spec:
+  groups:
+  - name: cnpg.replication
+    interval: 60s
+    rules:
+    - alert: CNPGReplicationLagHigh
+      expr: |
+        cnpg_pg_replication_lag{namespace="rda"} > 100
+      for: 15m
+      labels:
+        severity: warning
+        team: gdex-app-team
+        namespace: rda
+      annotations:
+        summary: "CNPG replication lag high on {{ $labels.pod }}"
+        description: "Replication lag is {{ $value }} WAL segments behind on {{ $labels.pod }} in cluster {{ $labels.cluster }}"
+
+    - alert: CNPGReplicationBroken
+      expr: |
+        cnpg_pg_replication_streaming_replicas{namespace="rda"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        team: gdex-app-team
+        namespace: rda
+      annotations:
+        summary: "CNPG replication broken for {{ $labels.cluster }}"
+        description: "Cluster {{ $labels.cluster }} has no streaming replicas. Replication may be broken."
+
+    - alert: CNPGClusterNotHealthy
+      expr: |
+        cnpg_collector_up{namespace="rda"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        team: gdex-app-team
+        namespace: rda
+      annotations:
+        summary: "CNPG cluster {{ $labels.cluster }} is not healthy"
+        description: "The CNPG exporter for cluster {{ $labels.cluster }} is down, indicating cluster health issues"
