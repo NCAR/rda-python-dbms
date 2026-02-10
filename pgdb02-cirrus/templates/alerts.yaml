@@ -4,7 +4,7 @@ metadata:
   name: cnpg-replication-alerts
   namespace: rda
   labels:
-    team: rda-app-team
+    team: gdex-app-team
 spec:
   groups:
   - name: cnpg.replication
@@ -16,7 +16,7 @@ spec:
       for: 15m
       labels:
         severity: warning
-        team: rda-app-team
+        team: gdex-app-team
         namespace: rda
       annotations:
         summary: "CNPG replication lag high on {{ `{{` }} $labels.pod {{ `}}` }}"
@@ -28,7 +28,7 @@ spec:
       for: 5m
       labels:
         severity: critical
-        team: rda-app-team
+        team: gdex-app-team
         namespace: rda
       annotations:
         summary: "CNPG replication broken for {{ `{{` }} $labels.cluster {{ `}}` }}"
@@ -40,7 +40,7 @@ spec:
       for: 5m
       labels:
         severity: critical
-        team: rda-app-team
+        team: gdex-app-team
         namespace: rda
       annotations:
         summary: "CNPG cluster {{ `{{` }} $labels.cluster {{ `}}` }} is not healthy"
