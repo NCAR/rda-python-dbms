@@ -1,6 +1,7 @@
 # RDA PostgreSQL Management
 
 This repository contains:
+
 - Python package to manage RDA PostgreSQL databases
 - Helm charts for PostgreSQL clusters via CloudNativePG
 
@@ -11,7 +12,7 @@ This repository contains:
 - **pgdb02** (ML cluster): Replication target (streaming replica from pgdb01)
 - **pgdb03** (ML cluster)
 
-Both clusters are managed via the [CloudNativePG operator](https://cloudnative-pg.io/) using Helm charts from `https://cloudnative-pg.github.io/charts`.
+All Postgres clusters are managed via the [CloudNativePG operator](https://cloudnative-pg.io/) using Helm charts from `https://cloudnative-pg.github.io/charts`.
 
 ### Deployment
 All PostgreSQL resources are automatically deployed and updated via **ArgoCD**. To make changes:
@@ -26,7 +27,7 @@ No manual `kubectl apply` or Helm commands are needed for routine updates.
 
 If replication fails or pgdb02 becomes out of sync with pgdb01, you can rebuild it by deleting the cluster resource. The cluster will automatically re-bootstrap from pgdb01 via `pg_basebackup`.
 
-**Note:** Make sure you are targeting the right database before running any of these commands. 
+**Note:** Make sure you are targeting the right database before running any of these commands.
 
 **Option 1: Via ArgoCD UI**
 1. Navigate to the pgdb02 application in [ArgoCD](https://mlc1-argo.k8s.ucar.edu/applications/argocd/rda-pgdb02?view=tree&resource=)
