@@ -5,6 +5,7 @@ metadata:
   namespace: rda
   labels:
     team: gdex-app-team
+    release: kube-prometheus-stack
 spec:
   groups:
   - name: pg.replication
