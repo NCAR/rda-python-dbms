@@ -1,0 +1,47 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gdex-pg-replication-alerts
+  namespace: rda
+  labels:
+    team: gdex-app-team
+spec:
+  groups:
+  - name: pg.replication
+    interval: 60s
+    rules:
+    - alert: PGReplicationLagHigh
+      expr: |
+        cnpg_pg_replication_lag{namespace="rda"} > 100
+      for: 15m
+      labels:
+        severity: warning
+        team: gdex-app-team
+        namespace: rda
+      annotations:
+        summary: "PostgresDB replication lag high on {{ $labels.pod }}"
+        description: "Replication lag is {{ $value }} WAL segments behind on {{ $labels.pod }} in cluster {{ $labels.cluster }}"
+
+    - alert: PGReplicationBroken
+      expr: |
+        cnpg_pg_replication_streaming_replicas{namespace="rda"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        team: gdex-app-team
+        namespace: rda
+      annotations:
+        summary: "PostgresDB replication broken for {{ $labels.cluster }}"
+        description: "Cluster {{ $labels.cluster }} has no streaming replicas. Replication may be broken."
+
+    - alert: PGClusterNotHealthy
+      expr: |
+        cnpg_collector_up{namespace="rda"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        team: gdex-app-team
+        namespace: rda
+      annotations:
+        summary: "PostgresDB cluster {{ $labels.cluster }} is not healthy"
+        description: "The Postgres exporter for cluster {{ $labels.cluster }} is down, indicating cluster health issues"

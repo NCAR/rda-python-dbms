@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: gdex-app-team
+  namespace: rda
+  labels:
+    alertmanagerConfig: gdex
+    namespace: rda
+spec:
+  route:
+    receiver: gdex-app-team
+    groupBy:
+      - alertname
+    groupWait: 10s
+    groupInterval: 1m
+    repeatInterval: 60m 
+    matchers:
+      - name: namespace
+        value: rda
+        matchType: "="
+
+  receivers:
+    - name: gdex-app-team
+      emailConfigs:
+        - to: decs-info@ucar.edu
+          from: alertmanager@k8s.ucar.edu
+          smarthost: vdir.ucar.edu:25  
