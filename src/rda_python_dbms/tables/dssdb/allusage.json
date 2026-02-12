@@ -18,7 +18,7 @@
     },
     {
       "name": "email",
-      "type": "varchar(80)",
+      "type": "varchar(128)",
       "comment": "user email address"
     },
     {
