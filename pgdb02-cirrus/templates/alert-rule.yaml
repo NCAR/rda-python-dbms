@@ -19,8 +19,8 @@ spec:
         team: gdex-app-team
         namespace: rda
       annotations:
-        summary: "PostgresDB replication lag high on {{ $labels.pod }}"
-        description: "Replication lag is {{ $value }} WAL segments behind on {{ $labels.pod }} in cluster {{ $labels.cluster }}"
+        summary: "PostgresDB replication lag high on {{`{{ $labels.pod }}`}}"
+        description: "Replication lag is {{`{{ $value }}`}} WAL segments behind on {{`{{ $labels.pod }}`}} in cluster {{`{{ $labels.cluster }}`}}"
 
     - alert: PGReplicationBroken
       expr: |
@@ -31,8 +31,8 @@ spec:
         team: gdex-app-team
         namespace: rda
       annotations:
-        summary: "PostgresDB replication broken for {{ $labels.cluster }}"
-        description: "Cluster {{ $labels.cluster }} has no streaming replicas. Replication may be broken."
+        summary: "PostgresDB replication broken for {{`{{ $labels.cluster }}`}}"
+        description: "Cluster {{`{{ $labels.cluster }}`}} has no streaming replicas. Replication may be broken."
 
     - alert: PGClusterNotHealthy
       expr: |
@@ -43,5 +43,5 @@ spec:
         team: gdex-app-team
         namespace: rda
       annotations:
-        summary: "PostgresDB cluster {{ $labels.cluster }} is not healthy"
-        description: "The Postgres exporter for cluster {{ $labels.cluster }} is down, indicating cluster health issues"
+        summary: "PostgresDB cluster {{`{{ $labels.cluster }}`}} is not healthy"
+        description: "The Postgres exporter for cluster {{`{{ $labels.cluster }}`}} is down, indicating cluster health issues"
