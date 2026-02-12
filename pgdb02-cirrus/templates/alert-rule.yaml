@@ -25,14 +25,14 @@ spec:
 
     - alert: PGReplicationBroken
       expr: |
-        cnpg_pg_replication_streaming_replicas{namespace="rda"} == 0
+        cnpg_pg_replication_streaming_replicas{namespace="rda", cluster="pgdb03"} == 0
       for: 5m
       labels:
         severity: critical
         team: gdex-app-team
         namespace: rda
       annotations:
-        summary: "PostgresDB replication broken for {{`{{ $labels.cluster }}`}}"
+        summary: "PostgresDB cluster replication broken for {{`{{ $labels.cluster }}`}}"
         description: "Cluster {{`{{ $labels.cluster }}`}} has no streaming replicas. Replication may be broken."
 
     - alert: PGClusterNotHealthy
