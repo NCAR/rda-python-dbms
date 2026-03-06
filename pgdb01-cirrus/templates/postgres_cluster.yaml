@@ -37,7 +37,7 @@ spec:
             name: {{ .Values.db.backups.s3.secretName }}
             key: secret_key
     {{- end }}
-    {{- end }}
+  {{- end }}
 
   # Add TLS certificates for encrypted communication
   certificates:

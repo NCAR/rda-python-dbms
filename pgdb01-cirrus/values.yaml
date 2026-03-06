@@ -13,5 +13,6 @@ db:
       memory: 128Gi
   
   backups:
+    enabled: false
     s3:
       enabled: false
