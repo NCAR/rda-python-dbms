@@ -18,10 +18,17 @@ spec:
       - name: namespace
         value: rda
         matchType: "="
+    routes:
+      - receiver: "null"
+        matchers:
+          - name: alertname
+            value: InfoInhibitor
+            matchType: "="
 
   receivers:
     - name: gdex-app-team
       emailConfigs:
         - to: decs-info@ucar.edu
           from: alertmanager@k8s.ucar.edu
-          smarthost: vdir.ucar.edu:25  
+          smarthost: vdir.ucar.edu:25
+    - name: "null"
