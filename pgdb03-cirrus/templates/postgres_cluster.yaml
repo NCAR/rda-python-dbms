@@ -17,6 +17,8 @@ spec:
 
   {{- if .Values.db.backups }}
   backup: 
+    # Keep 8 weekly backups
+    retentionPolicy: "8w"
     target: "prefer-standby"
     {{- if .Values.db.backups.volumeSnapshot }}
     volumeSnapshot:
@@ -24,8 +26,6 @@ spec:
     {{- end }}
     {{- if .Values.db.backups.s3.enabled }}
     barmanObjectStore:
-      # Keep 8 weekly backups
-      retentionPolicy: "8w"
       wal:
         compression: bzip2
       data:
