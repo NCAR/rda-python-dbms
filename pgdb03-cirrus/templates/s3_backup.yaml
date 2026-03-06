@@ -1,0 +1,11 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: {{ .Values.db.name }}-backup
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "0 0 2 * * *"  # daily at 2am
+  backupOwnerReference: self
+  cluster:
+    name: {{ .Values.db.name }}
+  method: barmanObjectStore

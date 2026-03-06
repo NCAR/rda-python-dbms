@@ -16,7 +16,7 @@ spec:
       memory: {{ .Values.db.resource.limits.memory }}
   
   {{- if .Values.db.backups }}
-  backup: 
+  backup:     
     {{- if .Values.db.backups.volumeSnapshot }}
     volumeSnapshot:
       className: {{ .Values.db.backups.volumeSnapshot.snapshotClassName }}

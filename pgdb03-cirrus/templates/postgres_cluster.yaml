@@ -24,6 +24,8 @@ spec:
     {{- end }}
     {{- if .Values.db.backups.s3.enabled }}
     barmanObjectStore:
+      # Keep 8 weekly backups
+      retentionPolicy: "8w"
       wal:
         compression: bzip2
       data:
