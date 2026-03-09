@@ -10,6 +10,34 @@ spec:
   instances: {{ .Values.db.instances }}
   storage:
     size: {{ .Values.db.size }}
+  resources:
+    limits:
+      cpu: {{ .Values.db.resource.limits.cpu | quote }}
+      memory: {{ .Values.db.resource.limits.memory }}
+  
+  {{- if .Values.db.backups }}
+  backup:     
+    {{- if .Values.db.backups.volumeSnapshot }}
+    volumeSnapshot:
+      className: {{ .Values.db.backups.volumeSnapshot.snapshotClassName }}
+    {{- end }}
+    {{- if .Values.db.backups.s3.enabled }}
+    barmanObjectStore:
+      wal:
+        compression: bzip2
+      data:
+        compression: bzip2
+      destinationPath: {{ .Values.db.backups.s3.destinationPath }}
+      endpointURL: {{ .Values.db.backups.s3.endpointURL }}
+      s3Credentials:
+          accessKeyId:
+            name: {{ .Values.db.backups.s3.secretName }}
+            key: access_key
+          secretAccessKey:
+            name: {{ .Values.db.backups.s3.secretName }}
+            key: secret_key
+    {{- end }}
+  {{- end }}
 
   # Add TLS certificates for encrypted communication
   certificates:
@@ -22,19 +50,14 @@ spec:
   # Configure postgres superuser from su_external_secret
   superuserSecret:
     name: "{{ .Values.db.name }}-superuser"
-
-  # Allow outside hosts to connect to the database
+    
   postgresql:
     parameters:
       # Connection settings
-      listen_addresses: "*"
-      port: "5432"
       max_connections: "500"
       
       # SSL Configuration
-      ssl: "on"
       ssl_ciphers: "HIGH:!aNULL"
-      ssl_prefer_server_ciphers: "on"
       ssl_min_protocol_version: "TLSv1.3"
       
       # Memory settings
@@ -55,23 +78,16 @@ spec:
       min_wal_size: "1GB"
       
       # Replication settings
-      max_wal_senders: "3"
-      max_replication_slots: "3"
-      wal_keep_size: "256"
-      max_slot_wal_keep_size: "-1"
-      hot_standby: "on"
+      max_wal_senders: "6"
+      max_replication_slots: "6"
+      wal_keep_size: "1024MB"
+      max_slot_wal_keep_size: "100GB"
       max_standby_archive_delay: "-1"
       max_standby_streaming_delay: "-1"
       
       # Logging settings
-      log_destination: "stderr"
       logging_collector: "on"
-      log_directory: "log"
-      log_filename: "postgresql-%Y-%m-%d_%H%M%S.log"
-      log_file_mode: "0644"
       log_rotation_age: "0"
-      log_rotation_size: "1GB"
-      log_truncate_on_rotation: "off"
       log_min_duration_statement: "120000"
       log_line_prefix: "%t %a [%p] "
       log_timezone: "America/Denver"
@@ -87,7 +103,7 @@ spec:
       
       # Lock management
       max_locks_per_transaction: "1024"
-    
+      
     pg_hba:
       # Local connections with md5 authentication
       - local all root md5
@@ -108,3 +124,6 @@ spec:
       
       # Remote replication
       - host replication all 128.117.0.0/16 trust
+
+      # Remote replication from Kubernetes pod network
+      - host replication all 10.0.0.0/16 trust

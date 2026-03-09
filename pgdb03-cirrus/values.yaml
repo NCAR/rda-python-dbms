@@ -1,9 +1,23 @@
 db:
   name: pgdb03
   group: pgdb03
-  instances: 3
-  size: 7000Gi
+  instances: 2
+  size: 9000Gi
   superUser:
     usernameKey: username
     passwordKey: password
     secretPath: gdex/pgdb03
+  resource:
+    limits:
+      cpu: '16'
+      memory: 128Gi
+  backups:
+    enabled: false
+    volumeSnapshot:
+      enabled: false
+    s3:
+      enabled: true
+      secretName: pgdb03-backup-s3-creds
+      endpointURL: https://boreas.hpc.ucar.edu:6443
+      destinationPath: s3://gdex
+      secretPath: gdex/boreas

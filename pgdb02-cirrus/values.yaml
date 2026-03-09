@@ -1,9 +1,25 @@
 db:
   name: pgdb02
   group: pgdb02
-  instances: 3
-  size: 5000Gi
+  instances: 1
+  size: 5001Gi
   superUser:
     usernameKey: username
     passwordKey: password
+    replicationUserKey: repuser
+    replicationPassKey: reppass
     secretPath: gdex/pgdb02
+  resource:
+    limits:
+      cpu: '16'
+      memory: 128Gi
+  backups:
+    volumeSnapshot:
+      enabled: true
+      snapshotClassName: csi-rbdplugin-snapclass
+    s3:
+      enabled: false
+      secretName: pgdb02-backup-s3-creds
+      endpointURL: https://boreas.hpc.ucar.edu:6443
+      destinationPath: s3://gdex
+      secretPath: gdex/boreas
