@@ -211,11 +211,15 @@ class PgChksum(PgCMD, PgSplit):
          cnt = len(pgrecs['wid']) if pgrecs else 0
          wfrecs = {}
          if cnt > 0:
+            tmpcnt = 0
             for i in range(cnt):
                dsid = pgrecs['dsid'][i]
                pgrec = self.pgget_wfile(dsid, flds, 'wid = {}'.format(pgrecs['wid'][i]))
-               pgrec['dsid'] = dsid
-               self.addrecord(wfrecs, pgrec, i)
+               if pgrec:
+                  pgrec['dsid'] = dsid
+                  self.addrecord(wfrecs, pgrec, i)
+                  tmpcnt += 1
+            cnt = tmpcnt
       if cnt > 0:
          if fcnt == 0 or fcnt > cnt: self.PGSUM['c'] = cnt
          self.PGSUM['f'] = wfrecs
@@ -331,7 +335,7 @@ class PgChksum(PgCMD, PgSplit):
          locflag = pgrec['locflag']
          if locflag == 'O':
             fname = "{}/{}".format(pgrec['dsid'], pgrec['wfile'])
-            self.evaluate_object_file(fname, pgrec, 'rda-data', cnts)
+            self.evaluate_object_file(fname, pgrec, 'gdex-data', cnts)
          else:
             fname = pgrec['wfile']
             if not re.match(r'^/', fname):
