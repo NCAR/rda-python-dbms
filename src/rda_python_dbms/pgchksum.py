@@ -335,7 +335,7 @@ class PgChksum(PgCMD, PgSplit):
          locflag = pgrec['locflag']
          if locflag == 'O':
             fname = "{}/{}".format(pgrec['dsid'], pgrec['wfile'])
-            self.evaluate_object_file(fname, pgrec, 'gdex-data', cnts)
+            self.evaluate_object_file(fname, pgrec, self.PVALS['BUCKET'], cnts)
          else:
             fname = pgrec['wfile']
             if not re.match(r'^/', fname):
