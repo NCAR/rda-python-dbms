@@ -217,7 +217,7 @@ class PgChksum(PgCMD, PgSplit):
                pgrec = self.pgget_wfile(dsid, flds, 'wid = {}'.format(pgrecs['wid'][i]))
                if pgrec:
                   pgrec['dsid'] = dsid
-                  self.addrecord(wfrecs, pgrec, i)
+                  self.addrecord(wfrecs, pgrec, tmpcnt)
                   tmpcnt += 1
             cnt = tmpcnt
       if cnt > 0:
