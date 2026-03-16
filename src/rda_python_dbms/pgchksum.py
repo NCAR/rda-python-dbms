@@ -176,7 +176,7 @@ class PgChksum(PgCMD, PgSplit):
    # get the checksum filelist for wfile
    def get_checksum_wfilelist(self):
       self.PVALS['TYPE'] = "Web"
-      self.PVALS['BUCKET'] = 'rda-data'
+      self.PVALS['BUCKET'] = 'gdex-data'
       flds = "wid, wfile, type, locflag, data_size, checksum, date_modified, time_modified"
       if self.PGSUM['f']:
          pgrecs = self.pgmhget('wfile', 'wid, dsid', {'wfile' : self.PGSUM['f']})
@@ -211,11 +211,15 @@ class PgChksum(PgCMD, PgSplit):
          cnt = len(pgrecs['wid']) if pgrecs else 0
          wfrecs = {}
          if cnt > 0:
+            tmpcnt = 0
             for i in range(cnt):
                dsid = pgrecs['dsid'][i]
                pgrec = self.pgget_wfile(dsid, flds, 'wid = {}'.format(pgrecs['wid'][i]))
-               pgrec['dsid'] = dsid
-               self.addrecord(wfrecs, pgrec, i)
+               if pgrec:
+                  pgrec['dsid'] = dsid
+                  self.addrecord(wfrecs, pgrec, tmpcnt)
+                  tmpcnt += 1
+            cnt = tmpcnt
       if cnt > 0:
          if fcnt == 0 or fcnt > cnt: self.PGSUM['c'] = cnt
          self.PGSUM['f'] = wfrecs
@@ -226,7 +230,7 @@ class PgChksum(PgCMD, PgSplit):
    # get the checksum filelist for sfile
    def get_checksum_sfilelist(self):
       self.PVALS['TYPE'] = "Saved"
-      self.PVALS['BUCKET'] = 'rda-decsdata'
+      self.PVALS['BUCKET'] = 'gdex-decsdata'
       flds = "sid, sfile, dsid, type, locflag, data_size, checksum, date_modified, time_modified"
       hcnd = {}
       fcnt = self.PGSUM['c']
@@ -331,7 +335,7 @@ class PgChksum(PgCMD, PgSplit):
          locflag = pgrec['locflag']
          if locflag == 'O':
             fname = "{}/{}".format(pgrec['dsid'], pgrec['wfile'])
-            self.evaluate_object_file(fname, pgrec, 'rda-data', cnts)
+            self.evaluate_object_file(fname, pgrec, self.PVALS['BUCKET'], cnts)
          else:
             fname = pgrec['wfile']
             if not re.match(r'^/', fname):
@@ -348,7 +352,7 @@ class PgChksum(PgCMD, PgSplit):
          locflag = pgrec['locflag']
          if locflag == 'O':
             fname = "{}/{}".format(pgrec['dsid'], pgrec['sfile'])
-            self.evaluate_object_file(fname, pgrec, 'rda-decsdata', cnts)
+            self.evaluate_object_file(fname, pgrec, self.PVALS['BUCKET'], cnts)
          else:
             fname = pgrec['sfile']
             if not re.match(r'^/', fname):
