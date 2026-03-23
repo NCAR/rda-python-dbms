@@ -16,14 +16,15 @@ spec:
       cpu: {{ .Values.db.resource.limits.cpu | quote }}
       memory: {{ .Values.db.resource.limits.memory }}
   
-  {{- if .Values.db.backups }}
   backup:     
     {{- if .Values.db.backups.volumeSnapshot }}
     volumeSnapshot:
       className: {{ .Values.db.backups.volumeSnapshot.snapshotClassName }}
     {{- end }}
-  {{- end }}
 
+    # Keep 8 weekly backups
+    retentionPolicy: "8w"
+    
   {{- if .Values.db.backups.s3.enabled }}
   plugins:
   - enabled: true
