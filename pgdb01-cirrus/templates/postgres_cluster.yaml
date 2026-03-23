@@ -32,6 +32,26 @@ spec:
       barmanObjectName: boreas
   {{- end }}
 
+  bootstrap:
+    pg_basebackup:
+      source: pgdb02-external
+      
+  monitoring:
+    enablePodMonitor: true
+  replica:
+    enabled: true
+    source: pgdb02-external
+
+  externalClusters:
+  - name: pgdb02-external
+    connectionParameters:
+      host: pgdb02.k8s.ucar.edu
+      user: "repl" 
+      sslmode: prefer
+    password:
+      name: {{ .Values.db.name }}-superuser
+      key: replication-password
+
   # Add TLS certificates for encrypted communication
   certificates:
     serverTLSSecret: {{ .Values.db.name }}-server-cert
