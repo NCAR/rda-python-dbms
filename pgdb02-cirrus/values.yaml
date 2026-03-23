@@ -15,10 +15,10 @@ db:
       memory: 128Gi
   backups:
     volumeSnapshot:
-      enabled: true
+      enabled: false
       snapshotClassName: csi-rbdplugin-snapclass
     s3:
-      enabled: false
+      enabled: true
       secretName: pgdb02-backup-s3-creds
       endpointURL: https://boreas.hpc.ucar.edu:6443
       destinationPath: s3://gdex
