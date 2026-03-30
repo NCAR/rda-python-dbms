@@ -24,6 +24,11 @@ spec:
           - name: alertname
             value: InfoInhibitor
             matchType: "="
+      - receiver: "null"
+        matchers:
+          - name: deployment
+            value: (riley|chiaweih|dattore)-.*
+            matchType: "=~"
 
   receivers:
     - name: gdex-app-team
