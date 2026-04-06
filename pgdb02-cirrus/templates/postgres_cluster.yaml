@@ -70,8 +70,12 @@ spec:
   postgresql:
     parameters:
       # Connection settings
-      max_connections: "500"
-      
+      max_connections: "1000"
+
+      # set idle timeout to 8 hours
+      idle_session_timeout: "8h"
+      idle_in_transaction_session_timeout: "8h" 
+
       # SSL Configuration
       ssl_ciphers: "HIGH:!aNULL"
       ssl_min_protocol_version: "TLSv1.3"
