@@ -50,6 +50,7 @@ spec:
       host: pgdb02.k8s.ucar.edu
       user: "repl" 
       sslmode: prefer
+      primary_slot_name: "pgdb02_stream_slot"
     password:
       name: {{ .Values.db.name }}-superuser
       key: replication-password
@@ -90,6 +91,7 @@ spec:
       max_files_per_process: "2000"
       
       # WAL settings
+      primary_slot_name: "pgdb01_stream_slot"
       wal_level: "replica"
       checkpoint_timeout: "15min"
       checkpoint_completion_target: "0.9"
