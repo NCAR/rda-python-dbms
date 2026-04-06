@@ -23,18 +23,6 @@ spec:
         summary: "PostgresDB replication lag high on {{`{{ $labels.pod }}`}}"
         description: "Replication lag is {{`{{ $value }}`}} WAL segments behind on {{`{{ $labels.pod }}`}} in cluster {{`{{ $labels.cluster }}`}}"
 
-    - alert: PGReplicationBroken
-      expr: |
-        cnpg_pg_replication_streaming_replicas{namespace="rda"} == 0
-      for: 5m
-      labels:
-        severity: critical
-        team: gdex-app-team
-        namespace: rda
-      annotations:
-        summary: "PostgresDB cluster replication broken for {{`{{ $labels.cluster }}`}}"
-        description: "Cluster {{`{{ $labels.cluster }}`}} has no streaming replicas. Replication may be broken."
-
     - alert: PGClusterNotHealthy
       expr: |
         cnpg_collector_up{namespace="rda"} == 0

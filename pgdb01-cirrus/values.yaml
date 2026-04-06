@@ -1,11 +1,13 @@
 db:
   name: pgdb01
   group: pgdb01
-  instances: 2
+  instances: 1
   size: 8000Gi
   superUser:
     usernameKey: username
     passwordKey: password
+    replicationUserKey: repuser
+    replicationPassKey: reppass
     secretPath: gdex/pgdb01
   resource:
     limits:
@@ -13,6 +15,8 @@ db:
       memory: 128Gi
   
   backups:
-    enabled: false
+    volumeSnapshot:
+      enabled: true
+      snapshotClassName: csi-rbdplugin-snapclass
     s3:
       enabled: false

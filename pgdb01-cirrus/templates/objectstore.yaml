@@ -17,6 +17,4 @@ spec:
         key: secret_key
     wal:
       compression: bzip2
-    data:
-      compression: gzip
 {{- end }}
