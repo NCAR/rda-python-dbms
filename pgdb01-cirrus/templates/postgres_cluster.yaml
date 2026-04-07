@@ -41,7 +41,7 @@ spec:
   monitoring:
     enablePodMonitor: true
   replica:
-    enabled: true
+    enabled: false
     source: pgdb02-external
 
   externalClusters:
