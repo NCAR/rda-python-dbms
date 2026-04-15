@@ -50,7 +50,7 @@ class PgBackup(PgFile):
             elif option == 'o':
                self.override = True
             else:
-               self.pglog("{}: unknow option".format(arg), self.LGEREX)
+               self.pglog("{}: unknown option".format(arg), self.LGEREX)
       self.cmdlog("pgbackup {}".format(' '.join(argv)))
    
    # start actions
