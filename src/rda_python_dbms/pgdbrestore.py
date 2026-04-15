@@ -35,7 +35,7 @@ class PgDBRestore(PgDBI):
          ms = re.match(r'^-(\w)$', arg)
          if ms:
             option = ms.group(1)
-            if option not in options: self.pglog("{}: unknow option".format(arg), self.LGEREX)
+            if option not in options: self.pglog("{}: unknown option".format(arg), self.LGEREX)
             if option == 'b': self.PGLOG['BCKGRND'] = 1
          elif option == 'd':
             self.dname = arg
@@ -61,7 +61,7 @@ class PgDBRestore(PgDBI):
       self.pglog(title, self.SNDACT)
       self.cmdlog()   
 
-   #  bacup one database
+   #  restore one database
    def pg_database_dbrestore(self):
       cmd = "pg_restore -d {} -h {} -U {} -w -j 16 -Fd {}".format(self.dname, self.hname, self.USNAME, self.pname)
       if not op.exists(self.pname):
@@ -69,7 +69,7 @@ class PgDBRestore(PgDBI):
       elif not self.pgsystem(cmd, self.LOGACT, 257):
          self.pglog("{}: Error restoring database\n{}".format(self.dname, self.PGLOG['SYSERR']), self.ERRACT)
 
-# main function to excecute this script
+# main function to execute this script
 def main():
    object = PgDBRestore()
    object.read_parameters()
