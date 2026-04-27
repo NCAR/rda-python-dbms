@@ -33,7 +33,7 @@ spec:
   receivers:
     - name: gdex-app-team
       emailConfigs:
-        - to: 'zji@ucar.edu, rpconroy@ucar.edu'
+        - to: 'zji@ucar.edu, rpconroy@ucar.edu', 'chiaweih@ucar.edu'
           from: alertmanager@k8s.ucar.edu
           smarthost: vdir.ucar.edu:25  
     - name: "null"
