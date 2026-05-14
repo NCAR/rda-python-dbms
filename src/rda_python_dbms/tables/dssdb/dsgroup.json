@@ -30,7 +30,7 @@
     },
     {
       "name": "grpid",
-      "type": "varchar(40)",
+      "type": "varchar(128)",
       "comment": "group id to identify a group"
     },
     {
