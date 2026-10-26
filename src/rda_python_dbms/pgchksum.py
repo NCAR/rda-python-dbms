@@ -467,8 +467,13 @@ class PgChksum(PgCMD, PgSplit):
          status = dict(self.QBSTATS)[bkey]
          if bkey != 'N': status += " (Backup ID {})".format(pgrec['bid'])
          if bkey in ('B', 'D'): status = "on " + status
-         if self.PGSUM['t'] == 'S' and location == 'on Disk' and not re.match(r'^/', pgrec['sfile']):
-            cfile = self.cold_storage_file(pgrec['dsid'], pgrec['type'], pgrec['sfile'])
+         if self.PGSUM['t'] == 'S' and location == 'on Disk':
+            sfile = pgrec['sfile']
+            # an absolute path under the dataset type directory has the same cold storage
+            # path as its relative one; other absolute paths are not in cold storage
+            tdir = "{}/{}/{}/".format(self.PGLOG['DECSHOME'], pgrec['dsid'], pgrec['type'])
+            if sfile.startswith(tdir): sfile = sfile[len(tdir):]
+            cfile = None if re.match(r'^/', sfile) else self.cold_storage_file(pgrec['dsid'], pgrec['type'], sfile)
             if cfile:
                cnts['bcnts']['C'] = cnts['bcnts'].get('C', 0) + 1
                status += ", Found in COLD_STORAGE " + cfile
