@@ -186,15 +186,14 @@ class PgChksum(PgCMD, PgSplit):
          fcnt = len(files)
          s = 's' if fcnt > 1 else ''
          tjoin = "dsowner LEFT JOIN dssgrp ON specialist = logname"
-         pgrecs = self.pgmget(tjoin, "specialist, priority, fstname",
-                              "dsid = '{}' ORDER BY priority, specialist".format(dsid), self.PVALS['emlerr'])
+         pgrecs = self.pgmget(tjoin, "specialist, fstname",
+                              "dsid = '{}' AND priority = 1 ORDER BY specialist".format(dsid), self.PVALS['emlerr'])
          if not pgrecs or not pgrecs['specialist']:
-            self.pglog("{}: No owner found in dsowner to email {} missing {} file{}".format(dsid, fcnt, self.PVALS['TYPE'], s), self.PVALS['emllog'])
+            self.pglog("{}: No primary owner found in dsowner to email {} missing {} file{}".format(dsid, fcnt, self.PVALS['TYPE'], s), self.PVALS['emllog'])
             continue
          owners = []
          names = []
          for i in range(len(pgrecs['specialist'])):
-            if pgrecs['priority'][i] != pgrecs['priority'][0]: break   # primary owner(s) only
             owners.append(pgrecs['specialist'][i])
             names.append(pgrecs['fstname'][i] if pgrecs['fstname'][i] else pgrecs['specialist'][i])
          subject = "PGCHKSUM: {} {} File{} Missing for {}".format(fcnt, self.PVALS['TYPE'], s, dsid)
