@@ -22,6 +22,7 @@ class PgChksum(PgCMD, PgSplit):
       super().__init__()  # initialize parent class
       self.PGSUM = {
          'd' : [],   # delay mode option, value array
+         'e' : 0,    # 1 for emailing dataset owners the list of their missing files
          's' : [],   # specialist login name array for email notice, default to none
          'f' : [],   # file name array, default to none
          'i' : [],   # dataset id array, default for all
@@ -46,6 +47,7 @@ class PgChksum(PgCMD, PgSplit):
          'begin' : 0,
          'end' : 0
       }
+      self.MISSING = {}   # dsid => list of missing file names with their location
       self.pgname = "pgchksum"
       self.pgcmd = None
 
@@ -61,7 +63,7 @@ class PgChksum(PgCMD, PgSplit):
                self.PGLOG['BCKGRND'] = 1   # processing in backgroup mode
                option = None
             elif option in self.PGSUM:
-               if option in ['m', 'n', 'x']:
+               if option in ['e', 'm', 'n', 'x']:
                   self.PGSUM[option] = 1
                   option = None
             else:
@@ -80,12 +82,13 @@ class PgChksum(PgCMD, PgSplit):
          else:
             self.pglog(arg + ": value passed without leading Option", self.LGEREX)
       if not self.PGSUM['t']:
-         print("Usage: pgchksum -t (W|S|Q) [-b] [-m] [-n] [-x] [-c FileCount] \\")
+         print("Usage: pgchksum -t (W|S|Q) [-b] [-e] [-m] [-n] [-x] [-c FileCount] \\")
          print("                [-d [Hostnames] [RerunCount]] [-f FileNames] [-i DatasetIDs] \\")
          print("                [-k SkipCount] [-o r|s] [-s Specialists]")
          print("  -b - background process and no screen output")
          print("  -c - File count to re-evaluate checksum; for all gathered files if not specified")
          print("  -d - delayed mode background/batch processes on RDA machines/DAV PBS nodes")
+         print("  -e - email the primary owner of each dataset a reminder listing its missing files")
          print("  -f - Re-evaluate the specify File names only")
          print("  -i - Dataset IDs the files belong; for all files if not specified")
          print("  -k - skip the given file count to re-evaluate checksum")
@@ -100,6 +103,8 @@ class PgChksum(PgCMD, PgSplit):
          self.pgexit(0)
       elif self.PGSUM['t'] not in 'QSW':
          self.pglog(self.PGSUM['t'] + ": Unknown File Type, must be one of 'QSW'", self.LGEREX)
+      if self.PGSUM['e'] and self.PGSUM['n']:
+         self.pglog("Option -e (email owners) cannot work with -n (no email)", self.LGEREX)
        # set different log file
       self.PGLOG['LOGFILE'] = self.pgname + '.log'
       self.set_suid(self.PGLOG['EUID'])
@@ -151,6 +156,7 @@ class PgChksum(PgCMD, PgSplit):
             self.evaluate_backfile_checksum(fcnt, pgrecs, cnts)
          self.dump_progress(fcnt, fcnt, cnts, self.PVALS['emlsum'])
          self.PVALS['end'] = int(time.time())
+         if self.PGSUM['e'] and self.MISSING: self.send_owner_emails()
          if not self.PGSUM['n']: self.send_check_email(cnts['cnt'], fcnt)
       if self.PGLOG['DSCHECK']:
          if self.PGLOG['ERRMSG']:
@@ -173,6 +179,44 @@ class PgChksum(PgCMD, PgSplit):
       else:
          self.pglog(subject, self.LOGWRN|self.SNDEML)
    
+   # email the primary owner(s) of each dataset the list of its missing files
+   def send_owner_emails(self):
+      for dsid in sorted(self.MISSING):
+         files = self.MISSING[dsid]
+         fcnt = len(files)
+         s = 's' if fcnt > 1 else ''
+         tjoin = "dsowner LEFT JOIN dssgrp ON specialist = logname"
+         pgrecs = self.pgmget(tjoin, "specialist, priority, fstname",
+                              "dsid = '{}' ORDER BY priority, specialist".format(dsid), self.PVALS['emlerr'])
+         if not pgrecs or not pgrecs['specialist']:
+            self.pglog("{}: No owner found in dsowner to email {} missing {} file{}".format(dsid, fcnt, self.PVALS['TYPE'], s), self.PVALS['emllog'])
+            continue
+         owners = []
+         names = []
+         for i in range(len(pgrecs['specialist'])):
+            if pgrecs['priority'][i] != pgrecs['priority'][0]: break   # primary owner(s) only
+            owners.append(pgrecs['specialist'][i])
+            names.append(pgrecs['fstname'][i] if pgrecs['fstname'][i] else pgrecs['specialist'][i])
+         subject = "PGCHKSUM: {} {} File{} Missing for {}".format(fcnt, self.PVALS['TYPE'], s, dsid)
+         msg = "Dear {},\n\n".format(' and '.join(names))
+         msg += ("Checking {} files of dataset {}, {} found the following {} file{} recorded in RDADB " +
+                 "but missing from the archive location{}. Please restore the file{}, or remove/update " +
+                 "the file record{} via dsarch if no longer needed:\n\n").format(
+                 self.PVALS['TYPE'], dsid, self.pgname, fcnt, s, s, s, s)
+         for i in range(fcnt):
+            msg += "{}. {}\n".format(i+1, files[i])
+         msg += "\n{} on {}\n".format(self.pgcmd, self.PGLOG['HOSTNAME'])
+         receiver = ', '.join(o if o.find('@') > -1 else o + "@ucar.edu" for o in owners)
+         if self.send_python_email(subject, receiver, msg, None, '', self.PVALS['emlerr']):
+            self.pglog("{}: emailed {} about {} missing {} file{}".format(dsid, receiver, fcnt, self.PVALS['TYPE'], s), self.PVALS['emllog'])
+
+   # record a missing file for the dataset owner email
+   def add_missing_file(self, fname, pgrec, location):
+      if not self.PGSUM['e']: return
+      dsid = pgrec['dsid']
+      if dsid not in self.MISSING: self.MISSING[dsid] = []
+      self.MISSING[dsid].append("{} (Type {}, {})".format(fname, pgrec['type'], location))
+
    # get the checksum filelist for wfile
    def get_checksum_wfilelist(self):
       self.PVALS['TYPE'] = "Web"
@@ -197,7 +241,7 @@ class PgChksum(PgCMD, PgSplit):
          if self.PGLOG['DSCHECK']: self.set_dscheck_attribute("dsid", dsid, self.PVALS['emlerr'])
          if self.PGSUM['m']: self.PVALS['CND'] += "(checksum IS NULL OR checksum < ' ') "
       elif dscnt > 1:
-         self.PVALS['CND'] = "dsid IN ({}) ".format(','.join(self.PGSUM['i']))
+         self.PVALS['CND'] = "dsid IN ('{}') ".format("','".join(self.PGSUM['i']))
       if self.PGSUM['o']: self.PVALS['CND'] += "ORDER BY {} ".format('wid' if self.PGSUM['o'] == 's' else "RANDOM()")
       if fcnt: self.PVALS['CND'] += "LIMIT {} ".format(fcnt)
       if self.PGSUM['k']:
@@ -206,6 +250,7 @@ class PgChksum(PgCMD, PgSplit):
       if dscnt == 1:
          wfrecs = self.pgmget_wfile(dsid, flds, self.PVALS['CND'])
          cnt = len(wfrecs['wid']) if wfrecs else 0
+         if cnt > 0: wfrecs['dsid'] = [dsid]*cnt   # wfile_{dsid} has no dsid column
       else:
          pgrecs = self.pgmget('wfile', 'wid, dsid', self.PVALS['CND'])
          cnt = len(pgrecs['wid']) if pgrecs else 0
@@ -245,7 +290,7 @@ class PgChksum(PgCMD, PgSplit):
          self.PVALS['CND'] = "dsid = '{}'".format(dsid)
          if self.PGLOG['DSCHECK']: self.set_dscheck_attribute("dsid", dsid, self.PVALS['emlerr'])
       elif cnt > 1:
-         self.PVALS['CND'] = "dsid IN ({})".format(','.join(self.PGSUM['i']))
+         self.PVALS['CND'] = "dsid IN ('{}')".format("','".join(self.PGSUM['i']))
       if self.PGSUM['m']:
          if self.PVALS['CND']: self.PVALS['CND'] += " AND "
          self.PVALS['CND'] += "(checksum IS NULL OR checksum < ' ')"
@@ -279,7 +324,7 @@ class PgChksum(PgCMD, PgSplit):
          self.PVALS['CND'] = "dsid = '{}' AND ".format(dsid)
          if self.PGLOG['DSCHECK']: self.set_dscheck_attribute("dsid", dsid, self.PVALS['emlerr'])
       elif cnt > 1:
-         self.PVALS['CND'] = "dsid IN ({}) AND ".format(','.join(self.PGSUM['i']))
+         self.PVALS['CND'] = "dsid IN ('{}') AND ".format("','".join(self.PGSUM['i']))
       if self.PGSUM['m']:
          self.PVALS['CND'] += "(checksum IS NULL OR checksum < ' ') AND "
       self.PVALS['CND'] += "status = 'A'"
@@ -376,6 +421,7 @@ class PgChksum(PgCMD, PgSplit):
          self.evaluate_file_status('DSK', fname, pgrec, info, cnts)
       else:
          self.pglog("{}: Type {} {} file is missing on Disk".format(fname, pgrec['type'], self.PVALS['TYPE']), self.PVALS['emllog'])
+         self.add_missing_file(fname, pgrec, 'on Disk')
          cnts['ecnt'] += 1
    
    # evaluate an object file
@@ -385,6 +431,7 @@ class PgChksum(PgCMD, PgSplit):
          self.evaluate_file_status('OBS', "{}-{}".format(bucket, fname), pgrec, info, cnts)
       else:
          self.pglog("{}: Type {} {} file is missing in Object Store".format(fname, pgrec['type'], self.PVALS['TYPE']), self.PVALS['emllog'])
+         self.add_missing_file("{}-{}".format(bucket, fname), pgrec, 'in Object Store')
          cnts['ecnt'] += 1
    
    # evaluate a quasar file
@@ -394,6 +441,7 @@ class PgChksum(PgCMD, PgSplit):
          self.evaluate_file_status('QSR', "{}-{}".format(endpoint, fname), pgrec, info, cnts)
       else:
          self.pglog("{}: Type {} {} file is missing on Quasar".format(fname, pgrec['type'], self.PVALS['TYPE']), self.PVALS['emllog'])
+         self.add_missing_file("{}-{}".format(endpoint, fname), pgrec, 'on Quasar')
          cnts['ecnt'] += 1
    
    # evaluate a file status
