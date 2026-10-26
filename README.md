@@ -17,9 +17,10 @@ current user:
 - `pgdbrestore` — restore a PostgreSQL database from a local dump directory
 - `pgchksum` — re-check archived files against their RDADB records
   (checksums, sizes and timestamps for Web and Saved files; sizes and
-  timestamps only for Quasar backup files), optionally fix the records
-  (`-x`), and email each dataset's primary owner a list of its missing
-  files (`-e`)
+  timestamps only for Quasar backup files), report the Quasar backup status
+  (and COLD_STORAGE copy for Saved files) of each missing Web/Saved file,
+  optionally fix the records (`-x`), and email each dataset's primary owner
+  a list of its missing files (`-e`)
 - `pgcmptables` — compare the columns, indexes and data of identical tables
   on two database servers
 - `pgschema` — copy the tables of a schema into the same schema in another

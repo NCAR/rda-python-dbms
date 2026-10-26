@@ -13,10 +13,16 @@
 import sys
 import re
 import time
+import glob
+from os import path as op
 from rda_python_common.pg_cmd import PgCMD
 from rda_python_common.pg_split import PgSplit
 
 class PgChksum(PgCMD, PgSplit):
+
+   # Quasar backup status of a file, by bfile.type and bfile.status of its bid
+   QBSTATS = (('B', 'Quasar Backup'), ('D', 'Quasar Backup&DR'),
+              ('P', 'Quasar Backup Pending'), ('N', 'Not Backed Up'), ('C', 'In COLD_STORAGE'))
 
    def __init__(self):
       super().__init__()  # initialize parent class
@@ -48,6 +54,8 @@ class PgChksum(PgCMD, PgSplit):
          'end' : 0
       }
       self.MISSING = {}   # dsid => list of missing file names with their location
+      self.BCKSTATS = {}  # bid => Quasar backup status key in QBSTATS
+      self.COLDDIRS = {}  # dsid => existing COLD_STORAGE directories of the dataset
       self.pgname = "pgchksum"
       self.pgcmd = None
 
@@ -88,7 +96,8 @@ class PgChksum(PgCMD, PgSplit):
          print("  -b - background process and no screen output")
          print("  -c - File count to re-evaluate checksum; for all gathered files if not specified")
          print("  -d - delayed mode background/batch processes on RDA machines/DAV PBS nodes")
-         print("  -e - email the primary owner of each dataset a reminder listing its missing files")
+         print("  -e - email the primary owner of each dataset a reminder listing its missing files,")
+         print("       each with its Quasar backup status (W/S files)")
          print("  -f - Re-evaluate the specify File names only")
          print("  -i - Dataset IDs the files belong; for all files if not specified")
          print("  -k - skip the given file count to re-evaluate checksum")
@@ -147,7 +156,8 @@ class PgChksum(PgCMD, PgSplit):
          if self.PGSUM['x']: msg += 'and Fix '
          msg += "checksum/size/timestamp for {} {} files{}".format(fcnt, self.PVALS['TYPE'], self.PVALS['OFFSET'])
          self.pglog(msg, self.PVALS['emlsum'])
-         cnts = {'cnt' : 0, 'pcnt' : 0, 'xcnt' : 0, 'ecnt' : 0, 'mcnt' : 0, 'ncnt' : 0, 'tcnt' : 0, 'scnt' : 0}
+         cnts = {'cnt' : 0, 'pcnt' : 0, 'xcnt' : 0, 'ecnt' : 0, 'mcnt' : 0, 'ncnt' : 0, 'tcnt' : 0, 'scnt' : 0,
+                 'bcnts' : {}}   # Quasar backup status counts of the missing files
          if self.PGSUM['t'] == 'W':
             self.evaluate_webfile_checksum(fcnt, pgrecs, cnts)
          elif self.PGSUM['t'] == 'S':
@@ -204,23 +214,28 @@ class PgChksum(PgCMD, PgSplit):
                  self.PVALS['TYPE'], dsid, self.pgname, fcnt, s, s, s, s)
          for i in range(fcnt):
             msg += "{}. {}\n".format(i+1, files[i])
+         if self.PGSUM['t'] != 'Q':
+            msg += ("\nA file on Quasar Backup can be restored with 'dsarch {} -RQ'; a file Not Backed Up " +
+                    "cannot be restored from Quasar.\n").format(dsid)
          msg += "\n{} on {}\n".format(self.pgcmd, self.PGLOG['HOSTNAME'])
          receiver = ', '.join(o if o.find('@') > -1 else o + "@ucar.edu" for o in owners)
          if self.send_python_email(subject, receiver, msg, None, '', self.PVALS['emlerr']):
             self.pglog("{}: emailed {} about {} missing {} file{}".format(dsid, receiver, fcnt, self.PVALS['TYPE'], s), self.PVALS['emllog'])
 
    # record a missing file for the dataset owner email
-   def add_missing_file(self, fname, pgrec, location):
+   def add_missing_file(self, fname, pgrec, location, status = None):
       if not self.PGSUM['e']: return
       dsid = pgrec['dsid']
       if dsid not in self.MISSING: self.MISSING[dsid] = []
-      self.MISSING[dsid].append("{} (Type {}, {})".format(fname, pgrec['type'], location))
+      line = "{} (Type {}, missing {})".format(fname, pgrec['type'], location)
+      if status: line += "; " + status
+      self.MISSING[dsid].append(line)
 
    # get the checksum filelist for wfile
    def get_checksum_wfilelist(self):
       self.PVALS['TYPE'] = "Web"
       self.PVALS['BUCKET'] = 'gdex-data'
-      flds = "wid, wfile, type, locflag, data_size, checksum, date_modified, time_modified"
+      flds = "wid, wfile, type, locflag, bid, data_size, checksum, date_modified, time_modified"
       if self.PGSUM['f']:
          pgrecs = self.pgmhget('wfile', 'wid, dsid', {'wfile' : self.PGSUM['f']})
          cnt = len(pgrecs['wid']) if pgrecs else 0
@@ -275,7 +290,7 @@ class PgChksum(PgCMD, PgSplit):
    def get_checksum_sfilelist(self):
       self.PVALS['TYPE'] = "Saved"
       self.PVALS['BUCKET'] = 'gdex-decsdata'
-      flds = "sid, sfile, dsid, type, locflag, data_size, checksum, date_modified, time_modified"
+      flds = "sid, sfile, dsid, type, locflag, bid, data_size, checksum, date_modified, time_modified"
       hcnd = {}
       fcnt = self.PGSUM['c']
       cnt = len(self.PGSUM['f'])
@@ -367,6 +382,10 @@ class PgChksum(PgCMD, PgSplit):
       if cnts['ecnt'] > 0:
          cntmsg += "/{}".format(cnts['ecnt'])
          chkmsg += "/Nonexist"
+         if cnts['bcnts']:
+            # e.g. [Quasar Backup 10, Not Backed Up 2]
+            chkmsg += " [{}]".format(', '.join("{} {}".format(m, cnts['bcnts'][k])
+                                     for (k, m) in self.QBSTATS if k in cnts['bcnts']))
       self.pglog("{}{} {} files{} {}".format(cntmsg, ttlmsg, self.PVALS['TYPE'], self.PVALS['OFFSET'], chkmsg), logact)
    
    # evaluate checksums for web files
@@ -419,9 +438,7 @@ class PgChksum(PgCMD, PgSplit):
       if info:
          self.evaluate_file_status('DSK', fname, pgrec, info, cnts)
       else:
-         self.pglog("{}: Type {} {} file is missing on Disk".format(fname, pgrec['type'], self.PVALS['TYPE']), self.PVALS['emllog'])
-         self.add_missing_file(fname, pgrec, 'on Disk')
-         cnts['ecnt'] += 1
+         self.report_missing_file(fname, pgrec, 'on Disk', cnts)
    
    # evaluate an object file
    def evaluate_object_file(self, fname, pgrec, bucket, cnts):
@@ -429,9 +446,7 @@ class PgChksum(PgCMD, PgSplit):
       if info:
          self.evaluate_file_status('OBS', "{}-{}".format(bucket, fname), pgrec, info, cnts)
       else:
-         self.pglog("{}: Type {} {} file is missing in Object Store".format(fname, pgrec['type'], self.PVALS['TYPE']), self.PVALS['emllog'])
-         self.add_missing_file("{}-{}".format(bucket, fname), pgrec, 'in Object Store')
-         cnts['ecnt'] += 1
+         self.report_missing_file("{}-{}".format(bucket, fname), pgrec, 'in Object Store', cnts)
    
    # evaluate a quasar file
    def evaluate_quasar_file(self, fname, pgrec, endpoint, cnts):
@@ -439,10 +454,64 @@ class PgChksum(PgCMD, PgSplit):
       if info:
          self.evaluate_file_status('QSR', "{}-{}".format(endpoint, fname), pgrec, info, cnts)
       else:
-         self.pglog("{}: Type {} {} file is missing on Quasar".format(fname, pgrec['type'], self.PVALS['TYPE']), self.PVALS['emllog'])
-         self.add_missing_file("{}-{}".format(endpoint, fname), pgrec, 'on Quasar')
-         cnts['ecnt'] += 1
+         self.report_missing_file("{}-{}".format(endpoint, fname), pgrec, 'on Quasar', cnts)
    
+   # log a missing file with the Quasar backup status of a Web/Saved file, so it
+   # tells whether the file can be restored; record it for the owner email
+   def report_missing_file(self, fname, pgrec, location, cnts):
+      msg = "{}: Type {} {} file is missing {}".format(fname, pgrec['type'], self.PVALS['TYPE'], location)
+      status = None
+      if self.PGSUM['t'] != 'Q':
+         bkey = self.quasar_backup_status(pgrec['bid'])
+         cnts['bcnts'][bkey] = cnts['bcnts'].get(bkey, 0) + 1
+         status = dict(self.QBSTATS)[bkey]
+         if bkey != 'N': status += " (Backup ID {})".format(pgrec['bid'])
+         if bkey in ('B', 'D'): status = "on " + status
+         if self.PGSUM['t'] == 'S' and location == 'on Disk':
+            sfile = pgrec['sfile']
+            # an absolute path under the dataset type directory has the same cold storage
+            # path as its relative one; other absolute paths are not in cold storage
+            tdir = "{}/{}/{}/".format(self.PGLOG['DECSHOME'], pgrec['dsid'], pgrec['type'])
+            if sfile.startswith(tdir): sfile = sfile[len(tdir):]
+            cfile = None if re.match(r'^/', sfile) else self.cold_storage_file(pgrec['dsid'], pgrec['type'], sfile)
+            if cfile:
+               cnts['bcnts']['C'] = cnts['bcnts'].get('C', 0) + 1
+               status += ", Found in COLD_STORAGE " + cfile
+         msg += "; " + status
+      self.pglog(msg, self.PVALS['emllog'])
+      self.add_missing_file(fname, pgrec, location, status)
+      cnts['ecnt'] += 1
+
+   # get the Quasar backup status key of a file by its bid: B-backup, D-backup&DR once
+   # the backup file status is A, P-pending otherwise, N-not backed up without a bid
+   def quasar_backup_status(self, bid):
+      if not bid: return 'N'
+      if bid not in self.BCKSTATS:
+         pgrec = self.pgget('bfile', 'type, status', "bid = {}".format(bid), self.PVALS['emlerr'])
+         if pgrec and pgrec['status'] == 'A' and pgrec['type'] in ('B', 'D'):
+            self.BCKSTATS[bid] = pgrec['type']
+         else:
+            self.BCKSTATS[bid] = 'P'
+      return self.BCKSTATS[bid]
+
+   # find a saved file moved into GLADE cold storage, under <DECSHOME>/COLD_STORAGE/<dsid>
+   # or <DECSHOME>/cold_storage_<YYYYMMDD>/COLD_STORAGE/<dsid>, the dated ones newest first;
+   # checking a migrated file only reads its inode, it does not recall it from tape
+   def cold_storage_file(self, dsid, stype, sfile):
+      if dsid not in self.COLDDIRS:
+         dhome = self.PGLOG['DECSHOME']
+         cdirs = []
+         for cname in ('COLD_STORAGE', 'COLD_STORAGE_SINGLE_COPY'):
+            cdirs.append("{}/{}/{}".format(dhome, cname, dsid))
+         for cdir in sorted(glob.glob(dhome + "/cold_storage_*"), reverse = True):
+            for cname in ('COLD_STORAGE', 'COLD_STORAGE_SINGLE_COPY'):
+               cdirs.append("{}/{}/{}".format(cdir, cname, dsid))
+         self.COLDDIRS[dsid] = [cdir for cdir in cdirs if op.isdir(cdir)]
+      for cdir in self.COLDDIRS[dsid]:
+         cfile = "{}/{}/{}".format(cdir, stype, sfile)
+         if op.exists(cfile): return cfile
+      return None
+
    # evaluate a file status
    def evaluate_file_status(self, lname, fname, pgrec, info, cnts):
       msg = ''
