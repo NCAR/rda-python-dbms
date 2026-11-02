@@ -50,6 +50,7 @@ class PgChksum(PgCMD, PgSplit):
          'CND' : None,
          'TYPE' : None,
          'OFFSET' : '',
+         'SCOPE' : '',   # ' not backed up to Quasar' for -q
          'emllog' : self.LOGWRN,
          'emlsum' : self.LOGWRN,
          'emlerr' : self.LOGERR,
@@ -168,7 +169,7 @@ class PgChksum(PgCMD, PgSplit):
          if self.PVALS['STEP'] > 500: self.PVALS['STEP'] = 500   # maximum incremental step
          msg = 'Check '
          if self.PGSUM['x']: msg += 'and Fix '
-         msg += "checksum/size/timestamp for {} {} files{}".format(fcnt, self.PVALS['TYPE'], self.PVALS['OFFSET'])
+         msg += "checksum/size/timestamp for {} {} files{}{}".format(fcnt, self.PVALS['TYPE'], self.PVALS['SCOPE'], self.PVALS['OFFSET'])
          self.pglog(msg, self.PVALS['emlsum'])
          cnts = {'cnt' : 0, 'pcnt' : 0, 'xcnt' : 0, 'ecnt' : 0, 'mcnt' : 0, 'ncnt' : 0, 'tcnt' : 0, 'scnt' : 0,
                  'bcnts' : {}}   # Quasar backup status counts of the missing files
@@ -194,7 +195,7 @@ class PgChksum(PgCMD, PgSplit):
    def send_check_email(self, cnt, fcnt):
       s = 'es' if cnt > 1 else ''
       cstr = 'With {} Mismatch{}'.format(cnt, s)
-      subject = "PGCHKSUM for {} {} Files {}".format(self.PVALS['TYPE'], fcnt, cstr)
+      subject = "PGCHKSUM for {} {} Files{} {}".format(self.PVALS['TYPE'], fcnt, self.PVALS['SCOPE'], cstr)
       buf = self.cmd_execute_time(self.pgcmd, self.PVALS['end']-self.PVALS['begin']) + " Finished  on " + self.PGLOG['HOSTNAME']
       if self.PVALS['CND']: buf += "\n{} Files: {}".format(self.PVALS['TYPE'], self.PVALS['CND'])   
       self.set_email(buf, self.EMLTOP)
@@ -309,7 +310,7 @@ class PgChksum(PgCMD, PgSplit):
       if self.PGSUM['o']: self.PVALS['CND'] += "ORDER BY {} ".format('wid' if self.PGSUM['o'] == 's' else "RANDOM()")
       if fcnt: self.PVALS['CND'] += "LIMIT {} ".format(fcnt)
       if self.PGSUM['k']:
-         self.PVALS['OFFSET'] = "OFFSET {}".format(self.PGSUM['k'])
+         self.PVALS['OFFSET'] = " OFFSET {}".format(self.PGSUM['k'])
          self.PVALS['CND'] += self.PVALS['OFFSET']
       if dscnt == 1:
          wfrecs = self.pgmget_wfile(dsid, flds, self.PVALS['CND'])
@@ -339,6 +340,7 @@ class PgChksum(PgCMD, PgSplit):
    # get the checksum filelist of the Web files not backed up to Quasar; bid is kept in
    # wfile_{dsid} only, so query dataset by dataset, then order/skip/count across them
    def get_unbacked_wfilelist(self, flds):
+      self.PVALS['SCOPE'] = " not backed up to Quasar"
       fcnt = self.PGSUM['c']
       cnd = "bid = 0"
       if self.PGSUM['m']: cnd += " AND (checksum IS NULL OR checksum < ' ')"
@@ -481,7 +483,7 @@ class PgChksum(PgCMD, PgSplit):
             # e.g. [Quasar Backup 10, Not Backed Up 2]
             chkmsg += " [{}]".format(', '.join("{} {}".format(m, cnts['bcnts'][k])
                                      for (k, m) in self.QBSTATS if k in cnts['bcnts']))
-      self.pglog("{}{} {} files{} {}".format(cntmsg, ttlmsg, self.PVALS['TYPE'], self.PVALS['OFFSET'], chkmsg), logact)
+      self.pglog("{}{} {} files{}{} {}".format(cntmsg, ttlmsg, self.PVALS['TYPE'], self.PVALS['SCOPE'], self.PVALS['OFFSET'], chkmsg), logact)
    
    # evaluate checksums for web files
    def evaluate_webfile_checksum(self, fcnt, pgrecs, cnts):
