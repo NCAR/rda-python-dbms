@@ -36,6 +36,7 @@ class PgChksum(PgCMD, PgSplit):
          'p' : '',   # working path, default to self.PGLOG['UPDTWKP']/pgchksum
          'c' : 0,    # number of files to re-evauate checksums, default 0 for all
          'k' : 0,    # skip the number of files to re-evauate checksums
+         'l' : 0,    # 1 for dumping missing files into <dsid>_<type>.mis, one file per dataset
          'm' : 0,    # 1 for check/fix files missing checksum only
          'n' : 0,    # 1 for not sending email
          'r' : 0,    # running time in unit of hour
@@ -54,7 +55,9 @@ class PgChksum(PgCMD, PgSplit):
          'end' : 0
       }
       self.MISSING = {}   # dsid => list of missing file names with their location
+      self.MISDUMP = {}   # dsid => list of missing file rows to dump into <dsid>_<type>.mis
       self.BCKSTATS = {}  # bid => Quasar backup status key in QBSTATS
+      self.BCKFILES = {}  # bid => Quasar backup file name
       self.COLDDIRS = {}  # dsid => existing COLD_STORAGE directories of the dataset
       self.pgname = "pgchksum"
       self.pgcmd = None
@@ -71,7 +74,7 @@ class PgChksum(PgCMD, PgSplit):
                self.PGLOG['BCKGRND'] = 1   # processing in backgroup mode
                option = None
             elif option in self.PGSUM:
-               if option in ['e', 'm', 'n', 'x']:
+               if option in ['e', 'l', 'm', 'n', 'x']:
                   self.PGSUM[option] = 1
                   option = None
             else:
@@ -90,7 +93,7 @@ class PgChksum(PgCMD, PgSplit):
          else:
             self.pglog(arg + ": value passed without leading Option", self.LGEREX)
       if not self.PGSUM['t']:
-         print("Usage: pgchksum -t (W|S|Q) [-b] [-e] [-m] [-n] [-x] [-c FileCount] \\")
+         print("Usage: pgchksum -t (W|S|Q) [-b] [-e] [-l] [-m] [-n] [-x] [-c FileCount] \\")
          print("                [-d [Hostnames] [RerunCount]] [-f FileNames] [-i DatasetIDs] \\")
          print("                [-k SkipCount] [-o r|s] [-s Specialists]")
          print("  -b - background process and no screen output")
@@ -101,6 +104,9 @@ class PgChksum(PgCMD, PgSplit):
          print("  -f - Re-evaluate the specify File names only")
          print("  -i - Dataset IDs the files belong; for all files if not specified")
          print("  -k - skip the given file count to re-evaluate checksum")
+         print("  -l - dump the files recorded in RDADB but missing from the archive location into")
+         print("       file <dsid>_<type>.mis under the working path, one file for each dataset, in")
+         print("       the dsarch -GW/-GS/-GQ format so it can be fed to dsarch via option -IF")
          print("  -m - check/fix files missing checksum only, works with a single dsid provided via option -i")
          print("  -n - do not send email notice to anybody")
          print("  -o - order files radomly (r) or sequencially (s) by file ID, default to not ordering")
@@ -166,6 +172,7 @@ class PgChksum(PgCMD, PgSplit):
             self.evaluate_backfile_checksum(fcnt, pgrecs, cnts)
          self.dump_progress(fcnt, fcnt, cnts, self.PVALS['emlsum'])
          self.PVALS['end'] = int(time.time())
+         if self.PGSUM['l'] and self.MISDUMP: self.dump_missing_files()
          if self.PGSUM['e'] and self.MISSING: self.send_owner_emails()
          if not self.PGSUM['n']: self.send_check_email(cnts['cnt'], fcnt)
       if self.PGLOG['DSCHECK']:
@@ -222,14 +229,48 @@ class PgChksum(PgCMD, PgSplit):
          if self.send_python_email(subject, receiver, msg, None, '', self.PVALS['emlerr']):
             self.pglog("{}: emailed {} about {} missing {} file{}".format(dsid, receiver, fcnt, self.PVALS['TYPE'], s), self.PVALS['emllog'])
 
-   # record a missing file for the dataset owner email
+   # record a missing file for the dataset owner email and the missing file dump
    def add_missing_file(self, fname, pgrec, location, status = None):
-      if not self.PGSUM['e']: return
       dsid = pgrec['dsid']
-      if dsid not in self.MISSING: self.MISSING[dsid] = []
-      line = "{} (Type {}, missing {})".format(fname, pgrec['type'], location)
-      if status: line += "; " + status
-      self.MISSING[dsid].append(line)
+      if self.PGSUM['e']:
+         if dsid not in self.MISSING: self.MISSING[dsid] = []
+         line = "{} (Type {}, missing {})".format(fname, pgrec['type'], location)
+         if status: line += "; " + status
+         self.MISSING[dsid].append(line)
+      if self.PGSUM['l']:
+         if dsid not in self.MISDUMP: self.MISDUMP[dsid] = []
+         if self.PGSUM['t'] == 'Q':
+            values = [pgrec['bfile'], pgrec['type']]
+         else:
+            values = [pgrec['wfile' if self.PGSUM['t'] == 'W' else 'sfile'], pgrec['type'], pgrec['locflag']]
+         values += [pgrec['data_size'], pgrec['checksum']]
+         if self.PGSUM['t'] != 'Q': values.append(self.BCKFILES.get(pgrec['bid']))
+         self.MISDUMP[dsid].append(values)
+
+   # dump the missing files of each dataset into <dsid>_<type>.mis under the working path,
+   # in the dsarch -GW/-GS/-GQ column format with the default delimiters
+   def dump_missing_files(self):
+      if self.PGSUM['t'] == 'W':
+         titles = ['WebFile', 'WebFileType', 'Location', 'Size', 'MD5Checksum', 'QuasarFile']
+      elif self.PGSUM['t'] == 'S':
+         titles = ['SavedFile', 'SavedFileType', 'Location', 'Size', 'MD5Checksum', 'QuasarFile']
+      else:
+         titles = ['QuasarFile', 'BackupFlag', 'Size', 'MD5Checksum']
+      for dsid in sorted(self.MISDUMP):
+         rows = self.MISDUMP[dsid]
+         fcnt = len(rows)
+         s = 's' if fcnt > 1 else ''
+         misfile = "{}_{}.mis".format(dsid, self.PGSUM['t'])
+         try:
+            with open(misfile, 'w') as fd:
+               fd.write("Dataset<=>{}\n".format(dsid))
+               fd.write('<:>'.join(titles) + "<:>\n")
+               for values in rows:
+                  fd.write('<:>'.join('' if v is None else str(v) for v in values) + "<:>\n")
+         except OSError as e:
+            self.pglog("{}: Error dumping {} missing {} file{}: {}".format(misfile, fcnt, self.PVALS['TYPE'], s, e), self.PVALS['emlerr'])
+            continue
+         self.pglog("{}: dumped {} missing {} file{} of {}".format(op.join(self.PGSUM['p'], misfile), fcnt, self.PVALS['TYPE'], s, dsid), self.PVALS['emllog'])
 
    # get the checksum filelist for wfile
    def get_checksum_wfilelist(self):
@@ -487,7 +528,8 @@ class PgChksum(PgCMD, PgSplit):
    def quasar_backup_status(self, bid):
       if not bid: return 'N'
       if bid not in self.BCKSTATS:
-         pgrec = self.pgget('bfile', 'type, status', "bid = {}".format(bid), self.PVALS['emlerr'])
+         pgrec = self.pgget('bfile', 'bfile, type, status', "bid = {}".format(bid), self.PVALS['emlerr'])
+         if pgrec: self.BCKFILES[bid] = pgrec['bfile']
          if pgrec and pgrec['status'] == 'A' and pgrec['type'] in ('B', 'D'):
             self.BCKSTATS[bid] = pgrec['type']
          else:
