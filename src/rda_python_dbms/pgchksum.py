@@ -103,7 +103,7 @@ class PgChksum(PgCMD, PgSplit):
          print("  -c - File count to re-evaluate checksum; for all gathered files if not specified")
          print("  -d - delayed mode background/batch processes on RDA machines/DAV PBS nodes")
          print("  -e - email the primary owner of each dataset a reminder listing its missing files,")
-         print("       each with its Quasar backup status (W/S files)")
+         print("       each with its Quasar backup status (W/S files), Cc the running specialist")
          print("  -f - Re-evaluate the specify File names only")
          print("  -i - Dataset IDs the files belong; for all files if not specified")
          print("  -k - skip the given file count to re-evaluate checksum")
@@ -235,7 +235,11 @@ class PgChksum(PgCMD, PgSplit):
                     "cannot be restored from Quasar.\n").format(dsid)
          msg += "\n{} on {}\n".format(self.pgcmd, self.PGLOG['HOSTNAME'])
          receiver = ', '.join(o if o.find('@') > -1 else o + "@ucar.edu" for o in owners)
-         if self.send_python_email(subject, receiver, msg, None, '', self.PVALS['emlerr']):
+         # carbon copy the specialist running pgchksum, unless a common account or an owner
+         runner = self.PGLOG['CURUID']
+         cc = '' if not runner or runner == self.PGLOG['COMMONUSER'] or runner in owners else runner + "@ucar.edu"
+         if self.send_python_email(subject, receiver, msg, None, cc, self.PVALS['emlerr']):
+            if cc: receiver += " (Cc {})".format(cc)
             self.pglog("{}: emailed {} about {} missing {} file{}".format(dsid, receiver, fcnt, self.PVALS['TYPE'], s), self.PVALS['emllog'])
 
    # record a missing file for the dataset owner email and the missing file dump
