@@ -14,6 +14,7 @@ import sys
 import re
 import time
 import glob
+import random
 from os import path as op
 from rda_python_common.pg_cmd import PgCMD
 from rda_python_common.pg_split import PgSplit
@@ -34,6 +35,7 @@ class PgChksum(PgCMD, PgSplit):
          'i' : [],   # dataset id array, default for all
          'o' : '',   # r - random, s - sequencial
          'p' : '',   # working path, default to self.PGLOG['UPDTWKP']/pgchksum
+         'q' : 0,    # 1 for checking Web files not backed up to Quasar only
          'c' : 0,    # number of files to re-evauate checksums, default 0 for all
          'k' : 0,    # skip the number of files to re-evauate checksums
          'l' : 0,    # 1 for dumping missing files into <dsid>_<type>.mis, one file per dataset
@@ -74,7 +76,7 @@ class PgChksum(PgCMD, PgSplit):
                self.PGLOG['BCKGRND'] = 1   # processing in backgroup mode
                option = None
             elif option in self.PGSUM:
-               if option in ['e', 'l', 'm', 'n', 'x']:
+               if option in ['e', 'l', 'm', 'n', 'q', 'x']:
                   self.PGSUM[option] = 1
                   option = None
             else:
@@ -93,7 +95,7 @@ class PgChksum(PgCMD, PgSplit):
          else:
             self.pglog(arg + ": value passed without leading Option", self.LGEREX)
       if not self.PGSUM['t']:
-         print("Usage: pgchksum -t (W|S|Q) [-b] [-e] [-l] [-m] [-n] [-x] [-c FileCount] \\")
+         print("Usage: pgchksum -t (W|S|Q) [-b] [-e] [-l] [-m] [-n] [-q] [-x] [-c FileCount] \\")
          print("                [-d [Hostnames] [RerunCount]] [-f FileNames] [-i DatasetIDs] \\")
          print("                [-k SkipCount] [-o r|s] [-s Specialists]")
          print("  -b - background process and no screen output")
@@ -111,6 +113,8 @@ class PgChksum(PgCMD, PgSplit):
          print("  -n - do not send email notice to anybody")
          print("  -o - order files radomly (r) or sequencially (s) by file ID, default to not ordering")
          print("  -p - working path, default to self.PGLOG['UPDTWKP']/pgchksum")
+         print("  -q - check Web files not backed up to Quasar (bid = 0) only, works with -t W;")
+         print("       -c, -k and -o apply to the not backed up files of all the given datasets")
          print("  -r - batch running hours, works with -d")
          print("  -s - specialists to receive email notice in addtion to the running specialist")
          print("  -t - mandatory file type: W-Web, S-Saved or Q-Quasar files")
@@ -118,6 +122,10 @@ class PgChksum(PgCMD, PgSplit):
          self.pgexit(0)
       elif self.PGSUM['t'] not in 'QSW':
          self.pglog(self.PGSUM['t'] + ": Unknown File Type, must be one of 'QSW'", self.LGEREX)
+      if self.PGSUM['q'] and self.PGSUM['t'] != 'W':
+         self.pglog("Option -q (not backed up files only) works with -t W only", self.LGEREX)
+      if self.PGSUM['q'] and self.PGSUM['f']:
+         self.pglog("Option -q (not backed up files only) cannot work with -f (file names)", self.LGEREX)
       if self.PGSUM['e'] and self.PGSUM['n']:
          self.pglog("Option -e (email owners) cannot work with -n (no email)", self.LGEREX)
        # set different log file
@@ -288,6 +296,7 @@ class PgChksum(PgCMD, PgSplit):
                pgrec['dsid'] = dsid
                self.addrecord(self.PGSUM['f'], pgrec, i)
          return cnt
+      if self.PGSUM['q']: return self.get_unbacked_wfilelist(flds)
       fcnt = self.PGSUM['c']
       self.PVALS['CND'] = ''
       dscnt = len(self.PGSUM['i'])
@@ -327,6 +336,51 @@ class PgChksum(PgCMD, PgSplit):
          self.pglog("No {} file found for {}".format(self.PVALS['TYPE'], self.PVALS['CND']), self.PVALS['emlerr'])
       return cnt
    
+   # get the checksum filelist of the Web files not backed up to Quasar; bid is kept in
+   # wfile_{dsid} only, so query dataset by dataset, then order/skip/count across them
+   def get_unbacked_wfilelist(self, flds):
+      fcnt = self.PGSUM['c']
+      cnd = "bid = 0"
+      if self.PGSUM['m']: cnd += " AND (checksum IS NULL OR checksum < ' ')"
+      dsids = self.PGSUM['i']
+      if len(dsids) == 1:
+         self.PVALS['CND'] = "dsid = '{}' AND {}".format(dsids[0], cnd)
+         if self.PGLOG['DSCHECK']: self.set_dscheck_attribute("dsid", dsids[0], self.PVALS['emlerr'])
+      elif dsids:
+         self.PVALS['CND'] = "dsid IN ('{}') AND {}".format("','".join(dsids), cnd)
+      else:
+         self.PVALS['CND'] = cnd
+         pgrecs = self.pgmget('wfile', 'DISTINCT dsid', 'ORDER BY dsid', self.PVALS['emlerr'])
+         dsids = pgrecs['dsid'] if pgrecs else []
+      wfrecs = {}
+      cnt = 0
+      for dsid in dsids:
+         pgrecs = self.pgmget_wfile(dsid, flds, cnd, self.PVALS['emlerr'])
+         if not pgrecs: continue
+         pgrecs['dsid'] = [dsid]*len(pgrecs['wid'])   # wfile_{dsid} has no dsid column
+         for fld in pgrecs:
+            if fld not in wfrecs: wfrecs[fld] = []
+            wfrecs[fld].extend(pgrecs[fld])
+         cnt += len(pgrecs['wid'])
+      if cnt > 0:
+         idxs = list(range(cnt))
+         if self.PGSUM['o'] == 'r':
+            random.shuffle(idxs)
+         elif self.PGSUM['o'] == 's':
+            idxs.sort(key = lambda i: wfrecs['wid'][i])
+         if self.PGSUM['k']:
+            self.PVALS['OFFSET'] = " OFFSET {}".format(self.PGSUM['k'])
+            idxs = idxs[self.PGSUM['k']:]
+         if fcnt: idxs = idxs[:fcnt]
+         cnt = len(idxs)
+         wfrecs = {fld : [wfrecs[fld][i] for i in idxs] for fld in wfrecs}
+      if cnt > 0:
+         self.PGSUM['c'] = cnt
+         self.PGSUM['f'] = wfrecs
+      else:
+         self.pglog("No {} file found for {}{}".format(self.PVALS['TYPE'], self.PVALS['CND'], self.PVALS['OFFSET']), self.PVALS['emlerr'])
+      return cnt
+
    # get the checksum filelist for sfile
    def get_checksum_sfilelist(self):
       self.PVALS['TYPE'] = "Saved"
