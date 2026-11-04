@@ -115,7 +115,9 @@ class PgChksum(PgCMD, PgSplit):
          print("  -o - order files radomly (r) or sequencially (s) by file ID, default to not ordering")
          print("  -p - working path, default to self.PGLOG['UPDTWKP']/pgchksum")
          print("  -q - check Web files not backed up to Quasar (bid = 0) only, works with -t W;")
-         print("       -c, -k and -o apply to the not backed up files of all the given datasets")
+         print("       -c, -k and -o apply to the not backed up files of all the given datasets;")
+         print("       like dsquasar, files under a top group whose Backup Flag is not B or D, or")
+         print("       P with a dataset Backup Flag not B or D, are left out")
          print("  -r - batch running hours, works with -d")
          print("  -s - specialists to receive email notice in addtion to the running specialist")
          print("  -t - mandatory file type: W-Web, S-Saved or Q-Quasar files")
@@ -361,7 +363,9 @@ class PgChksum(PgCMD, PgSplit):
       wfrecs = {}
       cnt = 0
       for dsid in dsids:
-         pgrecs = self.pgmget_wfile(dsid, flds, cnd, self.PVALS['emlerr'])
+         bcnd = self.backup_group_condition(dsid)
+         if not bcnd: continue   # no group of the dataset is flagged for backup
+         pgrecs = self.pgmget_wfile(dsid, flds, cnd + bcnd, self.PVALS['emlerr'])
          if not pgrecs: continue
          pgrecs['dsid'] = [dsid]*len(pgrecs['wid'])   # wfile_{dsid} has no dsid column
          for fld in pgrecs:
@@ -386,6 +390,27 @@ class PgChksum(PgCMD, PgSplit):
       else:
          self.pglog("No {} file found for {}{}".format(self.PVALS['TYPE'], self.PVALS['CND'], self.PVALS['OFFSET']), self.PVALS['emlerr'])
       return cnt
+
+   # the condition limiting the Web files of a dataset to those dsquasar backs up, the
+   # same way as dsquasar get_dataset_files(): a top group (pindex = 0) with backflag P
+   # takes dataset.backflag, files at gindex 0 take dataset.backflag, and only the files
+   # whose flag is B (backup) or D (backup&DR) are kept, so a group flagged N is left
+   # out. returns None when no file of the dataset is kept
+   def backup_group_condition(self, dsid):
+      pgrec = self.pgget('dataset', 'backflag', "dsid = '{}'".format(dsid), self.PVALS['emlerr'])
+      dflag = pgrec['backflag'] if pgrec else None
+      pgrecs = self.pgmget('dsgroup', 'gindex, backflag', "dsid = '{}' AND pindex = 0".format(dsid), self.PVALS['emlerr'])
+      gidxs = []
+      gcnt = len(pgrecs['gindex']) if pgrecs else 0
+      for i in range(gcnt):
+         bflg = pgrecs['backflag'][i]
+         if bflg == 'P': bflg = dflag
+         if bflg and bflg in 'BD': gidxs.append(str(pgrecs['gindex'][i]))
+      cnds = []
+      if dflag and dflag in 'BD': cnds.append("gindex = 0")
+      if gidxs: cnds.append("tindex IN ({})".format(', '.join(gidxs)))
+      if not cnds: return None
+      return " AND ({})".format(' OR '.join(cnds))
 
    # get the checksum filelist for sfile
    def get_checksum_sfilelist(self):
